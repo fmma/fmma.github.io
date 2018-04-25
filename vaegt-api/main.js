@@ -2,13 +2,17 @@ requirejs.config({
     baseUrl: '',
     paths: {
         d3: 'https://d3js.org/d3.v5.min',
-        "aws-sdk": 'https://sdk.amazonaws.com/js/aws-sdk-2.7.16.min'
-    }
+        'aws-sdk': 'https://sdk.amazonaws.com/js/aws-sdk-2.7.16.min'
+    },
+    
+    shim: {
+        'aws-sdk': {
+            exports: 'AWS'
+        }
+   }
 });
-// let a = document.createElement("a");
-// a.href = window.location;
-// console.log(a.pathname.split(".")[0].substr(1));
-require([/*a.pathname.split(".")[0].substr(1)*/ "post"], function (r) {
+
+require(["post"], function (r) {
     if(r) {
         if(document.body)
             r.makeSite(document.body);

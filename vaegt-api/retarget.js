@@ -39,7 +39,7 @@ define(["require", "exports", "./series", "./menu", "./plot"], function (require
                 }
                 let date = new Date();
                 const t = date.getTime();
-                const newTarget = target.filter(p => p.t.getTime() < t);
+                newTarget = target.filter(p => p.t.getTime() < t);
                 newTarget.push({
                     t: date,
                     w: +start.value
@@ -75,7 +75,7 @@ define(["require", "exports", "./series", "./menu", "./plot"], function (require
             };
             const targetName = series_1.sessionSeriesName() + "_target";
             const target = yield series_1.loadSeries(targetName);
-            const newTarget = target;
+            let newTarget = target;
             parent._button("Retarget", function () {
                 series_1.saveSeries(newTarget, targetName);
             })._class("big");

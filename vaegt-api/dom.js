@@ -12,13 +12,13 @@ define(["require", "exports"], function (require, exports) {
     };
     Node.prototype.provideNode = function (create) {
         if (this.reuseId == null) {
-            console.log("APPEND CHILD CALLED");
+            // console.log("APPEND CHILD CALLED");
             return this.appendChild(create());
         }
         let old = this[this.reuseId];
         if (old == null) {
             old = create();
-            console.log("APPEND CHILD CALLED", old);
+            // console.log("APPEND CHILD CALLED", old);
             this.appendChild(old);
             this[this.reuseId] = old;
         }

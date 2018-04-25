@@ -81,19 +81,14 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
         req.send(val);
     }
     exports.appendSeries_old = appendSeries_old;
-    // Initialize AWS
-    console.log(aws);
-    const windo = window;
-    const AWS = windo.AWS;
-    console.log(AWS);
     function saveSeries(series, name) {
-        const docClient = new AWS.DynamoDB.DocumentClient({
+        const docClient = new aws.DynamoDB.DocumentClient({
             region: "eu-west-1",
             endpoint: "https://dynamodb.eu-west-1.amazonaws.com",
             convertEmptyValues: true,
             accessKeyId: "AKIAIWAB4KO6GED7WCIQ",
             // secretAccessKey default can be used while using the downloadable version of DynamoDB. 
-            // For security reasons, do not store AWS Credentials in your files. Use Amazon Cognito instead.
+            // For security reasons, do not store aws Credentials in your files. Use Amazon Cognito instead.
             secretAccessKey: "apevBQ09w3Z3FjuOPjFLUPlO92KB6+PhKmlCkfWB"
         });
         const updateParams = {
@@ -121,13 +116,11 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
         if (seriesCache[name])
             return Promise.resolve(seriesCache[name]);
         return new Promise((resolve, reject) => {
-            const docClient = new AWS.DynamoDB.DocumentClient({
+            const docClient = new aws.DynamoDB.DocumentClient({
                 region: "eu-west-1",
                 endpoint: "https://dynamodb.eu-west-1.amazonaws.com",
                 convertEmptyValues: true,
                 accessKeyId: "AKIAIWAB4KO6GED7WCIQ",
-                // secretAccessKey default can be used while using the downloadable version of DynamoDB. 
-                // For security reasons, do not store AWS Credentials in your files. Use Amazon Cognito instead.
                 secretAccessKey: "apevBQ09w3Z3FjuOPjFLUPlO92KB6+PhKmlCkfWB"
             });
             var params = {
