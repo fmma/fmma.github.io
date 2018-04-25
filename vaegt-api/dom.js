@@ -185,6 +185,7 @@ define(["require", "exports"], function (require, exports) {
         input.step = "0.1";
         input.min = "50";
         input.max = "200";
+        input.pattern = "\\d*";
         input.placeholder = placeholder;
         input.value = String(value);
         input.onchange = () => {

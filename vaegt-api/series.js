@@ -43,7 +43,7 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
         });
     }
     exports.loadSeriesWithTarget = loadSeriesWithTarget;
-    function loadSeries_old(name) {
+    function loadSeries(name) {
         return new Promise((resolve, reject) => {
             const req = new XMLHttpRequest();
             req.onload = e => {
@@ -54,7 +54,7 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
             req.send();
         });
     }
-    exports.loadSeries_old = loadSeries_old;
+    exports.loadSeries = loadSeries;
     function saveSeries_old(series, name) {
         series.sort((a, b) => a.t.getTime() - b.t.getTime());
         const req = new XMLHttpRequest();
@@ -117,7 +117,7 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
     }
     exports.saveSeries = saveSeries;
     var seriesCache = {};
-    function loadSeries(name) {
+    function newLoadSeries(name) {
         if (seriesCache[name])
             return Promise.resolve(seriesCache[name]);
         return new Promise((resolve, reject) => {
@@ -155,7 +155,7 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
             });
         });
     }
-    exports.loadSeries = loadSeries;
+    exports.newLoadSeries = newLoadSeries;
     function appendSeries(weight, name) {
         return __awaiter(this, void 0, void 0, function* () {
             const s = yield loadSeries(name);

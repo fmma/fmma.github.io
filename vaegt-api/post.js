@@ -15,7 +15,13 @@ define(["require", "exports", "./series", "./menu"], function (require, exports,
             const targetInput = parent._inputWeight("Target", NaN)._class("big");
             targetInput.readOnly = true;
             const weightInput = parent._inputWeight("Vægt", NaN, () => targetTick(targetState))._class("big");
-            parent._button("Ok", () => series_1.appendSeries(weightInput.value, series_1.sessionSeriesName()))._class("big");
+            const okButton = parent._button("Ok", () => {
+                okButton.disabled = true;
+                series_1.appendSeries(weightInput.value, series_1.sessionSeriesName()).then(() => {
+                    weightInput.value = "";
+                    okButton.disabled = false;
+                });
+            })._class("big");
             menu_1.makeMenu(parent)._class("big");
             const targetState = {
                 weightInput: weightInput,

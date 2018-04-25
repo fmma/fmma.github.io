@@ -4,19 +4,19 @@ define(["require", "exports", "./post", "./plot", "./retarget", "./change_user",
     function makeMenu(parent) {
         const div = parent._div();
         // div._link("Forside", "post.html");
-        div._button("Forside", () => { document.body.innerHTML = ""; post_1.makeSite(document.body); });
+        div._button("Forside", () => { document.body.innerHTML = ""; post_1.makeSite(document.body); })._class("linklike");
         div._text(" - ");
         // div._link("Graf", "plot.html");
-        div._button("Graf", () => { document.body.innerHTML = ""; plot_1.makeSite(document.body); });
+        div._button("Graf", () => { document.body.innerHTML = ""; plot_1.makeSite(document.body); })._class("linklike");
         div._text(" - ");
         // div._link("Retarget", "retarget.html");
-        div._button("Retarget", () => { document.body.innerHTML = ""; retarget_1.makeSite(document.body); });
+        div._button("Retarget", () => { document.body.innerHTML = ""; retarget_1.makeSite(document.body); })._class("linklike");
         div._text(" - ");
         // div._link("Skift bruger", "change_user.html");
-        div._button("Skift bruger", () => { document.body.innerHTML = ""; change_user_1.makeSite(document.body); });
+        div._button("Skift bruger", () => { document.body.innerHTML = ""; change_user_1.makeSite(document.body); })._class("linklike");
         div._text(" - ");
         // div._link("Manu ret", "put.html");
-        div._button("Manu ret", () => { document.body.innerHTML = ""; put_1.makeSite(document.body); });
+        div._button("Manu ret", () => { document.body.innerHTML = ""; put_1.makeSite(document.body); })._class("linklike");
         return div;
     }
     exports.makeMenu = makeMenu;
