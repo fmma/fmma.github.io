@@ -25,10 +25,13 @@ define(["require", "exports", "./series", "./plot", "./menu"], function (require
             menu._button("Ny", () => {
                 if (newWeightIsTarget.checked) {
                     target.push({ t: today, w: newWeight.valueAsNumber, isTarget: true });
+                    target.sort((a, b) => a.t.getTime() - b.t.getTime());
                 }
                 else {
                     series.push({ t: today, w: newWeight.valueAsNumber, isTarget: false });
+                    series.sort((a, b) => a.t.getTime() - b.t.getTime());
                 }
+                plot.redrawSized(plotSize, plotSize);
                 table.redraw();
             });
             const target = data.target.map(p => (Object.assign({}, p, { isTarget: true })));
