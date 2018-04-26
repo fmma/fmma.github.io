@@ -12,16 +12,36 @@ requirejs.config({
    }
 });
 
+function error(err) {
+    if(document.body)
+        document.body.innerHTML = "Øv der er sket en fejl: " + err;
+    else
+        window.onload = () => {
+            document.body.innerHTML = "Øv der er sket en fejl: " + err;
+        }
+}
+
 require(["post"], function (r) {
     if(r) {
-        if(document.body)
-            r.makeSite(document.body);
+        if(document.body) {
+            try{
+                r.makeSite(document.body)
+            }
+            catch(err) {
+                error(err.toString());
+            }
+        }
         else
             window.onload = () => {
-                r.makeSite(document.body);
+                try {
+                    r.makeSite(document.body);
+                }
+                catch(err) {
+                    error(err.toString());
+                }
             }
     }
     else {
-        document.body.innerHTML = "Bad URL";
+        error("Bad URL");
     }
-});
+}, error);
