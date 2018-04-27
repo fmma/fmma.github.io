@@ -68,11 +68,13 @@ define(["require", "exports", "./series", "./menu", "./plot"], function (require
                 gramPerDagTyped = gramPerDag.valueAsNumber > 0;
                 computeOthers(gramPerDagTyped, false);
             };
+            gramPerDag.min = "0";
             const antalDage = parent._inputNumber("Antal dage", NaN)._class("big");
             antalDage.oninput = () => {
                 antalDageTyped = antalDage.valueAsNumber > 0;
                 computeOthers(antalDageTyped, true);
             };
+            antalDage.min = "0";
             const targetName = series_1.sessionSeriesName() + "_target";
             const target = yield series_1.loadSeries(targetName);
             let newTarget = target;
