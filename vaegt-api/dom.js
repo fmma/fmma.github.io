@@ -120,7 +120,7 @@ define(["require", "exports"], function (require, exports) {
             redraw();
         });
         const nextButton = buttons._button(">", () => {
-            pagedTable.index += pagedTable.pageSize;
+            pagedTable.index = Math.min(pagedTable.index + pagedTable.pageSize, nrows - pagedTable.pageSize);
             redraw();
         });
         const lastButton = buttons._button(">>", () => {
