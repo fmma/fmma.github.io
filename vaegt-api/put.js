@@ -40,7 +40,7 @@ define(["require", "exports", "./series", "./plot", "./menu"], function (require
                 const datapoints = series.concat(target).sort((a, b) => a.t.getTime() - b.t.getTime());
                 return { n: datapoints.length, ith: (i, row) => makeRow(row, series, target, table, datapoints[i]) };
             };
-            const table = parent._pagedTable(["Dato", "Tid", "Vægt", "Target?", "Handlinger"], 100, rowProvider);
+            const table = parent._pagedTable(["Dato", "Tid", "Vægt", "Target?", "Handlinger"], 10, rowProvider);
             table.node._class("data");
             parent._div()._class("plot")._svg();
             plot.setSeries(series, target);

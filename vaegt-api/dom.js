@@ -12,13 +12,11 @@ define(["require", "exports"], function (require, exports) {
     };
     Node.prototype.provideNode = function (create) {
         if (this.reuseId == null) {
-            // console.log("APPEND CHILD CALLED");
             return this.appendChild(create());
         }
         let old = this[this.reuseId];
         if (old == null) {
             old = create();
-            // console.log("APPEND CHILD CALLED", old);
             this.appendChild(old);
             this[this.reuseId] = old;
         }
@@ -67,8 +65,8 @@ define(["require", "exports"], function (require, exports) {
         let once = true;
         function redraw() {
             const rows = pagedTable.rows();
-            if (pagedTable.pageSize > rows.n) {
-                pagedTable.pageSize = rows.n;
+            if (pagedTable.index + pagedTable.pageSize > rows.n) {
+                pagedTable.pageSize = rows.n - pagedTable.index;
             }
             if (pagedTable.index < 0) {
                 pagedTable.index = 0;
@@ -76,12 +74,15 @@ define(["require", "exports"], function (require, exports) {
             if (pagedTable.index >= rows.n) {
                 pagedTable.index = rows.n - 1;
             }
-            // indexInput.value = String(pagedTable.index);
-            // pageSizeInput.value = String(pagedTable.pageSize);
-            // prevButton.disabled = pagedTable.index === 0;
-            // nextButton.disabled = pagedTable.index + pagedTable.pageSize >= rows.n;
-            // buttonsText.textContent = "/(" + rows.n + ") rækker pr side:";
+            indexInput.value = String(pagedTable.index);
+            indexToInput.value = String(pagedTable.index + pagedTable.pageSize);
+            prevButton.disabled = pagedTable.index === 0;
+            nextButton.disabled = pagedTable.index + pagedTable.pageSize >= rows.n;
+            buttonsText.textContent = " / " + rows.n + " ";
             const n = Math.min(pagedTable.index + pagedTable.pageSize, rows.n);
+            nrows = rows.n;
+            indexInput.max = String(nrows - pagedTable.pageSize);
+            indexToInput.max = String(nrows);
             tbody._draw(() => {
                 for (let i = pagedTable.index; i < n; ++i) {
                     const row = tbody._tr();
@@ -89,31 +90,43 @@ define(["require", "exports"], function (require, exports) {
                 }
             });
         }
+        let nrows = 0;
         const div = this._div();
         const table = div._table(...columns);
         let tbody = table.provideNode(() => document.createElement("tbody"));
         const buttons = div._div()._class("table-buttons");
-        const prevButton = buttons._button("Forrige", () => {
-            pagedTable.index = Math.max(0, pagedTable.index - pagedTable.pageSize);
-            redraw();
-        });
-        const nextButton = buttons._button("Næste", () => {
-            pagedTable.index += pagedTable.pageSize;
-            redraw();
-        });
-        buttons._text(" Række:");
-        const indexInput = buttons._input("Række", "number", "0", newIndex => {
+        buttons._text(" Rækker: ");
+        const indexInput = buttons._input("Rækker", "number", "0", newIndex => {
             pagedTable.index = +newIndex;
             redraw();
         });
-        indexInput.style.width = "100px";
-        const buttonsText = buttons._text("/(0) rækker pr side:");
-        const pageSizeInput = buttons._input("Antal rækker per side", "number", String(pageSize), newPageSize => {
-            pagedTable.pageSize = +newPageSize;
+        buttons._text(" - ");
+        const indexToInput = buttons._input("Rækker", "number", "0", newIndex => {
+            pagedTable.pageSize = (+newIndex) - pagedTable.index;
             redraw();
         });
-        pageSizeInput.style.width = "100px";
-        buttons._paragraph("");
+        indexToInput.style.width = "100px";
+        indexInput.style.width = "100px";
+        indexToInput.min = "0";
+        indexInput.min = "0";
+        const buttonsText = buttons._text(" / 0 ");
+        const firstButton = buttons._button("<<", () => {
+            pagedTable.index = 0;
+            redraw();
+        });
+        firstButton.style.marginLeft = "88px";
+        const prevButton = buttons._button("<", () => {
+            pagedTable.index = Math.max(0, pagedTable.index - pagedTable.pageSize);
+            redraw();
+        });
+        const nextButton = buttons._button(">", () => {
+            pagedTable.index += pagedTable.pageSize;
+            redraw();
+        });
+        const lastButton = buttons._button(">>", () => {
+            pagedTable.index = Math.max(0, nrows - pagedTable.pageSize);
+            redraw();
+        });
         const pagedTable = {
             redraw: redraw,
             rows: rows,
