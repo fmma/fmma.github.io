@@ -17,7 +17,7 @@ define(["require", "exports", "./series", "./menu", "./plot"], function (require
             let gramPerDagTyped = false;
             let antalDageTyped = false;
             function computeOthers(noop, antalDageChanged) {
-                console.log("COMPUTING", noop, antalDageChanged, startTyped, slutTyped, gramPerDagTyped, antalDageTyped);
+                // console.log("COMPUTING", noop, antalDageChanged, startTyped, slutTyped, gramPerDagTyped, antalDageTyped);
                 if (!noop)
                     return;
                 const st = start.valueAsNumber;
@@ -26,7 +26,7 @@ define(["require", "exports", "./series", "./menu", "./plot"], function (require
                 const n = antalDage.valueAsNumber;
                 if (!antalDageChanged && startTyped && slutTyped && gramPerDagTyped) {
                     const n = Math.max(0, (st - sl) / gpd * 1000.0);
-                    console.log("N", n);
+                    // console.log("N", n);
                     antalDage.value = n.toFixed(0);
                 }
                 else if (antalDageChanged && startTyped && slutTyped && antalDageTyped) {
