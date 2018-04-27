@@ -63,12 +63,12 @@ define(["require", "exports", "./series", "./menu", "./plot"], function (require
                 slutTyped = slut.valueAsNumber > 0;
                 computeOthers(slutTyped, false);
             };
-            const gramPerDag = parent._input("Gram/dag", "number", "")._class("big");
+            const gramPerDag = parent._inputNumber("Gram/dag", NaN)._class("big");
             gramPerDag.oninput = () => {
                 gramPerDagTyped = gramPerDag.valueAsNumber > 0;
                 computeOthers(gramPerDagTyped, false);
             };
-            const antalDage = parent._input("Antal dage", "number", "")._class("big");
+            const antalDage = parent._inputNumber("Antal dage", NaN)._class("big");
             antalDage.oninput = () => {
                 antalDageTyped = antalDage.valueAsNumber > 0;
                 computeOthers(antalDageTyped, true);
@@ -81,9 +81,8 @@ define(["require", "exports", "./series", "./menu", "./plot"], function (require
             })._class("big");
             menu_1.makeMenu(parent)._class("big");
             const plotSize = 500;
-            parent._div()._svg();
             plot.setSeries(series, newTarget);
-            plot.redrawSized(plotSize, plotSize);
+            plot.makePlot(parent._div());
         });
     }
     exports.makeSite = makeSite;

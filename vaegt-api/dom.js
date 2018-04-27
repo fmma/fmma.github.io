@@ -179,6 +179,19 @@ define(["require", "exports"], function (require, exports) {
         };
         return input;
     };
+    Node.prototype._inputNumber = function (placeholder, value, onchange = () => { }) {
+        const input = this.provideNode(() => document.createElement("input"));
+        input.type = "number";
+        input.pattern = "\\d*";
+        input.placeholder = placeholder;
+        input.value = String(value);
+        input.onchange = () => {
+            if (!isNaN(input.valueAsNumber)) {
+                onchange(input.valueAsNumber);
+            }
+        };
+        return input;
+    };
     Node.prototype._inputWeight = function (placeholder, value, onchange = () => { }) {
         const input = this.provideNode(() => document.createElement("input"));
         input.type = "number";

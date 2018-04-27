@@ -28,9 +28,24 @@ define(["require", "exports", "./series", "d3", "./menu"], function (require, ex
     exports.makeSite = makeSite;
     function makePlot(parent) {
         parent._svg();
-        redrawSized(window.innerWidth - 20, Math.min(window.innerWidth - 70, window.innerHeight - 70));
+        redrawFit();
+        let w = window.outerWidth;
+        let h = window.outerHeight;
+        window.onorientationchange = redrawFit;
+        window.onresize = () => {
+            if (!(w === window.outerWidth && h === window.outerHeight)) {
+                w = window.outerWidth;
+                h = window.outerHeight;
+                redrawFit();
+            }
+        };
     }
     exports.makePlot = makePlot;
+    function redrawFit() {
+        const w = window.innerWidth - 20;
+        const h = Math.min(window.innerWidth - 70, window.innerHeight / 2);
+        redrawSized(w, h);
+    }
     function redrawSized(width, height) {
         const leftBorder = 50;
         const rightBorder = 0;
