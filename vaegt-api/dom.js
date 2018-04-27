@@ -76,8 +76,10 @@ define(["require", "exports"], function (require, exports) {
             }
             indexInput.value = String(pagedTable.index);
             indexToInput.value = String(pagedTable.index + pagedTable.pageSize);
+            firstButton.disabled = pagedTable.index === 0;
             prevButton.disabled = pagedTable.index === 0;
             nextButton.disabled = pagedTable.index + pagedTable.pageSize >= rows.n;
+            lastButton.disabled = pagedTable.index + pagedTable.pageSize >= rows.n;
             buttonsText.textContent = " / " + rows.n + " ";
             const n = Math.min(pagedTable.index + pagedTable.pageSize, rows.n);
             nrows = rows.n;
