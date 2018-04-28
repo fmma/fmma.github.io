@@ -50,8 +50,7 @@ define(["require", "exports", "./series", "./menu", "./plot"], function (require
                     t: date,
                     w: +slut.value
                 });
-                plot.setSeries(series, newTarget);
-                plot.redrawSized(plotSize, plotSize);
+                plot.redrawFit(series, newTarget, svg);
             }
             const start = parent._inputWeight("Start vægt", series.length > 0 ? series[series.length - 1].w : NaN)._class("big");
             start.oninput = () => {
@@ -83,8 +82,7 @@ define(["require", "exports", "./series", "./menu", "./plot"], function (require
             })._class("big");
             menu_1.makeMenu(parent)._class("big");
             const plotSize = 500;
-            plot.setSeries(series, newTarget);
-            plot.makePlot(parent._div());
+            const svg = plot.makePlot(series, newTarget, parent._div());
         });
     }
     exports.makeSite = makeSite;

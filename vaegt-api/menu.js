@@ -1,31 +1,26 @@
-define(["require", "exports", "./dom"], function (require, exports) {
+define(["require", "exports", "./dom"], function (require, exports, dom_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function makeMenu(parent) {
         const div = parent._div();
         div._button("Forside", () => {
-            document.body.innerHTML = "";
-            new Promise((resolve_1, reject_1) => { require(["./post"], resolve_1, reject_1); }).then(po => po.makeSite(document.body));
+            new Promise((resolve_1, reject_1) => { require(["./post"], resolve_1, reject_1); }).then(dom_1.makeSite);
         })._class("linklike");
         div._text(" - ");
         div._button("Graf", () => {
-            document.body.innerHTML = "";
-            new Promise((resolve_2, reject_2) => { require(["./plot"], resolve_2, reject_2); }).then(pl => pl.makeSite(document.body));
+            new Promise((resolve_2, reject_2) => { require(["./plot"], resolve_2, reject_2); }).then(dom_1.makeSite);
         })._class("linklike");
         div._text(" - ");
         div._button("Retarget", () => {
-            document.body.innerHTML = "";
-            new Promise((resolve_3, reject_3) => { require(["./retarget"], resolve_3, reject_3); }).then(re => re.makeSite(document.body));
+            new Promise((resolve_3, reject_3) => { require(["./retarget"], resolve_3, reject_3); }).then(dom_1.makeSite);
         })._class("linklike");
         div._text(" - ");
         div._button("Skift bruger", () => {
-            document.body.innerHTML = "";
-            new Promise((resolve_4, reject_4) => { require(["./change_user"], resolve_4, reject_4); }).then(pl => pl.makeSite(document.body));
+            new Promise((resolve_4, reject_4) => { require(["./change_user"], resolve_4, reject_4); }).then(dom_1.makeSite);
         })._class("linklike");
         div._text(" - ");
         div._button("Manu ret", () => {
-            document.body.innerHTML = "";
-            new Promise((resolve_5, reject_5) => { require(["./put"], resolve_5, reject_5); }).then(pu => pu.makeSite(document.body));
+            new Promise((resolve_5, reject_5) => { require(["./put"], resolve_5, reject_5); }).then(dom_1.makeSite);
         })._class("linklike");
         return div;
     }

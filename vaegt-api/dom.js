@@ -48,10 +48,11 @@ define(["require", "exports"], function (require, exports) {
     Node.prototype._table = function (...columns) {
         const table = this.provideNode(() => document.createElement("table"));
         const head = table.provideNode(() => document.createElement("thead"));
-        columns.forEach(col => {
+        for (let i = 0; i < columns.length; ++i) {
+            const col = columns[i];
             const td = head.provideNode(() => document.createElement("td"));
             td.innerHTML = col;
-        });
+        }
         this.appendChild(table);
         return table;
     };
@@ -243,4 +244,40 @@ define(["require", "exports"], function (require, exports) {
         p.innerHTML = text;
         return p;
     };
+    function error(err) {
+        const msg = "Øv der er sket en fejl: ";
+        if (document.body)
+            document.body.innerHTML = msg + err;
+        else
+            window.onload = () => {
+                document.body.innerHTML = msg + err;
+            };
+    }
+    function makeSite(r) {
+        if (r) {
+            if (document.body) {
+                document.body.innerHTML = "";
+                try {
+                    const frag = document.createDocumentFragment();
+                    r.makeSite(frag).then(() => document.body.appendChild(frag));
+                }
+                catch (err) {
+                    error(err.toString());
+                }
+            }
+            else
+                window.onload = () => {
+                    try {
+                        r.makeSite(document.body);
+                    }
+                    catch (err) {
+                        error(err.toString());
+                    }
+                };
+        }
+        else {
+            error("Bad URL");
+        }
+    }
+    exports.makeSite = makeSite;
 });

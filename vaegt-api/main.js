@@ -13,15 +13,16 @@ requirejs.config({
 });
 
 function error(err) {
+    const msg = "Øv der er sket en fejl: ";
     if(document.body)
-        document.body.innerHTML = "Øv der er sket en fejl: " + err;
+        document.body.innerHTML = msg + err;
     else
         window.onload = () => {
-            document.body.innerHTML = "Øv der er sket en fejl: " + err;
+            document.body.innerHTML = msg + err;
         }
 }
 
-require(["post"], function (r) {
+require(["post", "dom"], function (r) {
     if(r) {
         if(document.body) {
             try{

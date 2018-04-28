@@ -31,42 +31,40 @@ define(["require", "exports", "./series", "./plot", "./menu"], function (require
                     series.push({ t: today, w: newWeight.valueAsNumber, isTarget: false });
                     series.sort((a, b) => a.t.getTime() - b.t.getTime());
                 }
-                plot.redrawSized(plotSize, plotSize);
+                plot.redrawFit(series, target, svg);
                 table.redraw();
             });
             const target = data.target.map(p => (Object.assign({}, p, { isTarget: true })));
             const series = data.series.map(p => (Object.assign({}, p, { isTarget: false })));
             const rowProvider = () => {
                 const datapoints = series.concat(target).sort((a, b) => a.t.getTime() - b.t.getTime());
-                return { n: datapoints.length, ith: (i, row) => makeRow(row, series, target, table, datapoints[i]) };
+                return { n: datapoints.length, ith: (i, row) => makeRow(svg, row, series, target, table, datapoints[i]) };
             };
             const table = parent._pagedTable(["Dato", "Tid", "Vægt", "Target?", "Handlinger"], 10, rowProvider);
             table.node._class("data");
-            parent._div()._class("plot")._svg();
-            plot.setSeries(series, target);
-            plot.redrawSized(plotSize, plotSize);
+            const svg = plot.makePlot(series, target, parent._div());
             table.redraw();
         });
     }
     exports.makeSite = makeSite;
-    function makeRow(row, series, target, table, p) {
+    function makeRow(svg, row, series, target, table, p) {
         row._td()._inputDate(p.t, () => {
             if (p.isTarget)
                 target.sort((a, b) => a.t.getTime() - b.t.getTime());
             else
                 series.sort((a, b) => a.t.getTime() - b.t.getTime());
-            plot.redrawSized(plotSize, plotSize);
+            plot.redrawFit(series, target, svg);
         });
         row._td()._inputTime(p.t, () => {
             if (p.isTarget)
                 target.sort((a, b) => a.t.getTime() - b.t.getTime());
             else
                 series.sort((a, b) => a.t.getTime() - b.t.getTime());
-            plot.redrawSized(plotSize, plotSize);
+            plot.redrawFit(series, target, svg);
         });
         row._td()._inputWeight("Vægt", p.w, w => {
             p.w = w;
-            plot.redrawSized(plotSize, plotSize);
+            plot.redrawFit(series, target, svg);
         });
         row._td()._checkbox(1, p.isTarget, isChecked => {
             if (isChecked) {
@@ -80,7 +78,7 @@ define(["require", "exports", "./series", "./plot", "./menu"], function (require
                 series.sort((a, b) => a.t.getTime() - b.t.getTime());
             }
             p.isTarget = isChecked;
-            plot.redrawSized(plotSize, plotSize);
+            plot.redrawFit(series, target, svg);
         });
         const buttons = row._td();
         buttons._button("Slet", () => {
@@ -89,7 +87,7 @@ define(["require", "exports", "./series", "./plot", "./menu"], function (require
             else
                 series.splice(series.indexOf(p), 1);
             table.redraw();
-            plot.redrawSized(plotSize, plotSize);
+            plot.redrawFit(series, target, svg);
         });
         buttons._button("Dupliker", () => {
             if (p.isTarget)
@@ -97,7 +95,7 @@ define(["require", "exports", "./series", "./plot", "./menu"], function (require
             else
                 series.splice(series.indexOf(p), 0, { t: new Date(p.t), w: p.w, isTarget: false });
             table.redraw();
-            plot.redrawSized(plotSize, plotSize);
+            plot.redrawFit(series, target, svg);
         });
     }
     function putForm(series, target) {

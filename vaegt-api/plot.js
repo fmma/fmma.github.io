@@ -9,59 +9,56 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 define(["require", "exports", "./series", "d3", "./menu"], function (require, exports, series_1, d3, menu_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.series = [];
-    exports.target = [];
-    function setSeries(s, t) {
-        exports.series = s;
-        exports.target = t;
-    }
-    exports.setSeries = setSeries;
     function makeSite(parent) {
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield series_1.loadSeriesWithTarget(series_1.sessionSeriesName());
-            exports.series = data.series;
-            exports.target = data.target;
-            makePlot(parent);
+            const series = data.series;
+            const target = data.target;
+            makePlot(series, target, parent);
             menu_1.makeMenu(parent)._class("big");
         });
     }
     exports.makeSite = makeSite;
-    function makePlot(parent) {
-        parent._svg();
-        redrawFit();
+    function makePlot(series, target, parent) {
+        const svg = parent._svg();
+        redrawFit(series, target, svg);
         let w = window.outerWidth;
         let h = window.outerHeight;
-        window.onorientationchange = redrawFit;
+        window.onorientationchange = () => redrawFit(series, target, svg);
         window.onresize = () => {
             if (!(w === window.outerWidth && h === window.outerHeight)) {
                 w = window.outerWidth;
                 h = window.outerHeight;
-                redrawFit();
+                redrawFit(series, target, svg);
             }
         };
+        return svg;
     }
     exports.makePlot = makePlot;
-    function redrawFit() {
+    function redrawFit(series, target, svg) {
         const w = window.innerWidth - 20;
         const h = Math.min(window.innerWidth - 70, window.innerHeight / 2);
-        redrawSized(w, h);
+        redrawSized(series, target, svg, w, h);
     }
-    function redrawSized(width, height) {
+    exports.redrawFit = redrawFit;
+    function redrawSized(series, target, svg, width, height) {
+        if (svg == null)
+            return;
         const leftBorder = 50;
         const rightBorder = 0;
         const topBorder = 0;
         const botBorder = 50;
-        const minT = Math.min(...exports.series.map(p => p.t.getTime()), ...exports.target.map(p => p.t.getTime()));
-        const maxT = Math.max(...exports.series.map(p => p.t.getTime()), ...exports.target.map(p => p.t.getTime()));
-        const minW = Math.min(...exports.series.map(p => p.w), ...exports.target.map(p => p.w));
-        const maxW = Math.max(...exports.series.map(p => p.w), ...exports.target.map(p => p.w));
+        const minT = Math.min(...series.map(p => p.t.getTime()), ...target.map(p => p.t.getTime()));
+        const maxT = Math.max(...series.map(p => p.t.getTime()), ...target.map(p => p.t.getTime()));
+        const minW = Math.min(...series.map(p => p.w), ...target.map(p => p.w));
+        const maxW = Math.max(...series.map(p => p.w), ...target.map(p => p.w));
         const timeScale = d3.scaleTime()
             .domain([minT, maxT])
             .range([0, width - leftBorder - rightBorder]);
         const weightScale = d3.scaleLinear()
             .domain([minW, maxW])
             .range([height - topBorder - botBorder, 0]);
-        const canvas = d3.select('svg')
+        const canvas = d3.select(svg)
             .attr('width', width)
             .attr('height', height);
         canvas.html("");
@@ -92,8 +89,8 @@ define(["require", "exports", "./series", "d3", "./menu"], function (require, ex
             .attr("opacity", "0.1")
             .call(d3.axisBottom(timeScale)
             .tickSize(-(height - topBorder - botBorder)));
-        plotSeries("steelblue", exports.series, plot, timeScale, weightScale);
-        plotSeries("red", exports.target, plot, timeScale, weightScale);
+        plotSeries("steelblue", series, plot, timeScale, weightScale);
+        plotSeries("red", target, plot, timeScale, weightScale);
     }
     exports.redrawSized = redrawSized;
     function plotSeries(color, series, canvas, timeScale, weightScale) {
