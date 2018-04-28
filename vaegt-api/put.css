@@ -28,7 +28,6 @@ div.menu {
   left: 0;
   width: 100%;
   background: "white";
-  height: 30px;
   z-index: 3;
   background: rgba(255, 255, 255, 1);
   border-bottom: 3px solid #73AD21;
