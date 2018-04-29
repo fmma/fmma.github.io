@@ -9,14 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 define(["require", "exports", "./series", "./menu"], function (require, exports, series_1, menu_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.title = "forside";
     function makeSite(parent) {
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield series_1.loadSeriesWithTarget(series_1.sessionSeriesName());
             const target = data.target;
             const targetInput = parent._inputWeight("Target", NaN)._class("big");
             targetInput.readOnly = true;
-            const weightInput = parent._inputWeight("Vægt", data.series[data.series.length - 1].w, () => { }, () => targetTick(targetState))._class("big");
+            const weightInput = parent._inputWeight("Vægt", data.series.length > 0 ? data.series[data.series.length - 1].w : NaN, () => { }, () => targetTick(targetState))._class("big");
             const okButton = parent._button("Ok", () => {
                 okButton.disabled = true;
                 okButton.textContent = "Registreret";

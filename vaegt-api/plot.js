@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 define(["require", "exports", "./series", "d3", "./menu"], function (require, exports, series_1, d3, menu_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.title = "graf";
     function makeSite(parent) {
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield series_1.loadSeriesWithTarget(series_1.sessionSeriesName());

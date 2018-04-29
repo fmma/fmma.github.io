@@ -10,7 +10,6 @@ define(["require", "exports", "./series", "./plot", "./menu"], function (require
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const plotSize = 500;
-    exports.title = "manuret";
     function makeSite(parent) {
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield series_1.loadSeriesWithTarget(series_1.sessionSeriesName());

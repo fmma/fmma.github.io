@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 define(["require", "exports", "./series", "./menu", "./plot"], function (require, exports, series_1, menu_1, plot) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.title = "retarget";
     function makeSite(parent) {
         return __awaiter(this, void 0, void 0, function* () {
             const series = yield series_1.loadSeries(series_1.sessionSeriesName());
