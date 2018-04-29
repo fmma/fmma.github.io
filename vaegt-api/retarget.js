@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 define(["require", "exports", "./series", "./menu", "./plot"], function (require, exports, series_1, menu_1, plot) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.title = "retarget";
     function makeSite(parent) {
         return __awaiter(this, void 0, void 0, function* () {
             const series = yield series_1.loadSeries(series_1.sessionSeriesName());
@@ -50,7 +51,7 @@ define(["require", "exports", "./series", "./menu", "./plot"], function (require
                     t: date,
                     w: +slut.value
                 });
-                plot.redrawFit(series, newTarget, svg);
+                plot.redrawFit([series, newTarget], svg);
             }
             const start = parent._inputWeight("Start vægt", series.length > 0 ? series[series.length - 1].w : NaN)._class("big");
             start.oninput = () => {
@@ -82,7 +83,7 @@ define(["require", "exports", "./series", "./menu", "./plot"], function (require
             })._class("big");
             menu_1.makeMenu(parent)._class("big");
             const plotSize = 500;
-            const svg = plot.makePlot(series, newTarget, parent._div());
+            const svg = plot.makePlot([series, newTarget], parent._div());
         });
     }
     exports.makeSite = makeSite;

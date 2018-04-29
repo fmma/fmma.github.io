@@ -208,7 +208,7 @@ define(["require", "exports"], function (require, exports) {
         };
         return input;
     };
-    Node.prototype._inputWeight = function (placeholder, value, onchange = () => { }) {
+    Node.prototype._inputWeight = function (placeholder, value, onchange = () => { }, oninput = () => { }) {
         const input = this.provideNode(() => document.createElement("input"));
         input.type = "number";
         input.step = "0.1";
@@ -229,10 +229,13 @@ define(["require", "exports"], function (require, exports) {
             if (input.value[0] === "1" && input.value.length === 4) {
                 input.value = input.value.substr(0, 3) + "." + input.value.substr(3, 1);
             }
+            if (!isNaN(input.valueAsNumber)) {
+                oninput(input.valueAsNumber);
+            }
         };
         return input;
     };
-    Node.prototype._checkbox = function (id, value, onchange = () => { }) {
+    Node.prototype._checkbox = function (value, onchange = () => { }) {
         const input = this.provideNode(() => document.createElement("input"));
         input.type = "checkbox";
         input.checked = value;
@@ -254,6 +257,7 @@ define(["require", "exports"], function (require, exports) {
             };
     }
     function makeSite(r) {
+        window.location.href = "#" + r.title;
         if (r) {
             if (document.body) {
                 document.body.innerHTML = "";

@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 define(["require", "exports", "./series", "./menu"], function (require, exports, series_1, menu_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.title = "bruger";
     function makeSite(parent) {
         return __awaiter(this, void 0, void 0, function* () {
             const form = parent._div()._form();

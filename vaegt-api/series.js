@@ -170,4 +170,30 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
         return p;
     }
     exports.partition = partition;
+    function interpolate(date, series, index) {
+        const t = date.getTime();
+        if (index == null)
+            index = { i: 0 };
+        let i = index.i;
+        let p0 = series[i];
+        let p1 = series[i + 1];
+        if (series.length - i < 2 || p0.t.getTime() > t) {
+            return null;
+        }
+        for (; i < series.length; ++i) {
+            if (t < p1.t.getTime()) {
+                break;
+            }
+            else {
+                p0 = p1;
+                p1 = series[i];
+            }
+        }
+        index.i = i;
+        const t0 = p0.t.getTime();
+        const t1 = p1.t.getTime();
+        const w = (t1 - t) * p0.w / (t1 - t0) + (t - t0) * p1.w / (t1 - t0);
+        return { t: date, w: w };
+    }
+    exports.interpolate = interpolate;
 });

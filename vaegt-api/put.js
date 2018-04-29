@@ -10,6 +10,7 @@ define(["require", "exports", "./series", "./plot", "./menu"], function (require
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const plotSize = 500;
+    exports.title = "manuret";
     function makeSite(parent) {
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield series_1.loadSeriesWithTarget(series_1.sessionSeriesName());
@@ -20,7 +21,7 @@ define(["require", "exports", "./series", "./plot", "./menu"], function (require
             const today = new Date();
             const newWeightDate = menu._inputDate(today);
             const newWeightTime = menu._inputTime(today);
-            const newWeightIsTarget = menu._checkbox(1, false);
+            const newWeightIsTarget = menu._checkbox(false);
             const newWeight = menu._inputWeight("Vægt", 80.0);
             menu._button("Ny", () => {
                 if (newWeightIsTarget.checked) {
@@ -31,7 +32,7 @@ define(["require", "exports", "./series", "./plot", "./menu"], function (require
                     series.push({ t: today, w: newWeight.valueAsNumber, isTarget: false });
                     series.sort((a, b) => a.t.getTime() - b.t.getTime());
                 }
-                plot.redrawFit(series, target, svg);
+                plot.redrawFit([series, target], svg);
                 table.redraw();
             });
             const target = data.target.map(p => (Object.assign({}, p, { isTarget: true })));
@@ -42,7 +43,7 @@ define(["require", "exports", "./series", "./plot", "./menu"], function (require
             };
             const table = parent._pagedTable(["Dato", "Tid", "Vægt", "Target?", "Handlinger"], 10, rowProvider);
             table.node._class("data");
-            const svg = plot.makePlot(series, target, parent._div());
+            const svg = plot.makePlot([series, target], parent._div());
             table.redraw();
         });
     }
@@ -53,20 +54,20 @@ define(["require", "exports", "./series", "./plot", "./menu"], function (require
                 target.sort((a, b) => a.t.getTime() - b.t.getTime());
             else
                 series.sort((a, b) => a.t.getTime() - b.t.getTime());
-            plot.redrawFit(series, target, svg);
+            plot.redrawFit([series, target], svg);
         });
         row._td()._inputTime(p.t, () => {
             if (p.isTarget)
                 target.sort((a, b) => a.t.getTime() - b.t.getTime());
             else
                 series.sort((a, b) => a.t.getTime() - b.t.getTime());
-            plot.redrawFit(series, target, svg);
+            plot.redrawFit([series, target], svg);
         });
         row._td()._inputWeight("Vægt", p.w, w => {
             p.w = w;
-            plot.redrawFit(series, target, svg);
+            plot.redrawFit([series, target], svg);
         });
-        row._td()._checkbox(1, p.isTarget, isChecked => {
+        row._td()._checkbox(p.isTarget, isChecked => {
             if (isChecked) {
                 series.splice(series.indexOf(p), 1);
                 target.push(p);
@@ -78,7 +79,7 @@ define(["require", "exports", "./series", "./plot", "./menu"], function (require
                 series.sort((a, b) => a.t.getTime() - b.t.getTime());
             }
             p.isTarget = isChecked;
-            plot.redrawFit(series, target, svg);
+            plot.redrawFit([series, target], svg);
         });
         const buttons = row._td();
         buttons._button("Slet", () => {
@@ -87,7 +88,7 @@ define(["require", "exports", "./series", "./plot", "./menu"], function (require
             else
                 series.splice(series.indexOf(p), 1);
             table.redraw();
-            plot.redrawFit(series, target, svg);
+            plot.redrawFit([series, target], svg);
         });
         buttons._button("Dupliker", () => {
             if (p.isTarget)
@@ -95,7 +96,7 @@ define(["require", "exports", "./series", "./plot", "./menu"], function (require
             else
                 series.splice(series.indexOf(p), 0, { t: new Date(p.t), w: p.w, isTarget: false });
             table.redraw();
-            plot.redrawFit(series, target, svg);
+            plot.redrawFit([series, target], svg);
         });
     }
     function putForm(series, target) {

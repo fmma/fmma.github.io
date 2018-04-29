@@ -9,26 +9,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 define(["require", "exports", "./series", "./menu"], function (require, exports, series_1, menu_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.title = "forside";
     function makeSite(parent) {
         return __awaiter(this, void 0, void 0, function* () {
-            const series = yield series_1.loadSeries(series_1.sessionSeriesName() + "_target");
+            const data = yield series_1.loadSeriesWithTarget(series_1.sessionSeriesName());
+            const target = data.target;
             const targetInput = parent._inputWeight("Target", NaN)._class("big");
             targetInput.readOnly = true;
-            const weightInput = parent._inputWeight("Vægt", NaN, () => targetTick(targetState))._class("big");
+            const weightInput = parent._inputWeight("Vægt", data.series[data.series.length - 1].w, () => { }, () => targetTick(targetState))._class("big");
             const okButton = parent._button("Ok", () => {
                 okButton.disabled = true;
+                okButton.textContent = "Registreret";
                 series_1.appendSeries(weightInput.value, series_1.sessionSeriesName()).then(() => {
-                    weightInput.value = "";
-                    okButton.disabled = false;
+                    window.setTimeout(() => {
+                        okButton.textContent = "Ok";
+                        okButton.disabled = false;
+                    }, 5000);
                 });
             })._class("big");
             menu_1.makeMenu(parent)._class("big");
             const targetState = {
                 weightInput: weightInput,
                 targetInput: targetInput,
-                series: series,
-                p0: series[0],
-                p1: series[1],
+                series: target,
+                p0: target[0],
+                p1: target[1],
                 i: 2
             };
             targetRepeat(targetState);
@@ -62,7 +67,7 @@ define(["require", "exports", "./series", "./menu"], function (require, exports,
         const w = (t1 - t) * p0.w / (t1 - t0) + (t - t0) * p1.w / (t1 - t0);
         const input = st.targetInput;
         const winput = st.weightInput;
-        const diff = w - +winput.value;
+        const diff = w - (+winput.value);
         input.value = diff.toFixed(7);
         input.style.color = "white";
         input.style.backgroundColor = diff < 0 ? "red" : "green";

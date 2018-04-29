@@ -1,6 +1,9 @@
 define(["require", "exports", "./dom"], function (require, exports, dom_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    window.onhashchange = (x) => {
+        console.log(x);
+    };
     function makeMenu(parent) {
         const div = parent._div();
         div._button("Forside", () => {

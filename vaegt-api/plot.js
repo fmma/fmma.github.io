@@ -9,49 +9,83 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 define(["require", "exports", "./series", "d3", "./menu"], function (require, exports, series_1, d3, menu_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.title = "graf";
     function makeSite(parent) {
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield series_1.loadSeriesWithTarget(series_1.sessionSeriesName());
-            const series = data.series;
-            const target = data.target;
-            makePlot(series, target, parent);
+            const svg = makePlot([data.series, data.target, []], parent);
+            const indexState = { i: 0 };
+            const diffSeries = [];
+            for (let i = 0; i < data.series.length; ++i) {
+                const p = series_1.interpolate(data.series[i].t, data.target, indexState);
+                console.log(p);
+                if (p != null) {
+                    diffSeries.push({ t: p.t, w: data.series[i].w - p.w });
+                }
+                else {
+                }
+            }
+            let showDiff = false;
+            let showTarget = true;
+            let showSeries = true;
+            parent._text("Vægt: ");
+            parent._checkbox(showSeries, b => {
+                showSeries = b;
+                redrawFit([showSeries ? data.series : [],
+                    showTarget ? data.target : [],
+                    showDiff ? diffSeries : []], svg);
+            });
+            parent._text("Target: ");
+            parent._checkbox(showTarget, b => {
+                showTarget = b;
+                redrawFit([showSeries ? data.series : [],
+                    showTarget ? data.target : [],
+                    showDiff ? diffSeries : []], svg);
+            });
+            parent._text("Diff: ");
+            parent._checkbox(showDiff, b => {
+                showDiff = b;
+                redrawFit([showSeries ? data.series : [],
+                    showTarget ? data.target : [],
+                    showDiff ? diffSeries : []], svg);
+            });
             menu_1.makeMenu(parent)._class("big");
         });
     }
     exports.makeSite = makeSite;
-    function makePlot(series, target, parent) {
+    function makePlot(serieses, parent) {
         const svg = parent._svg();
-        redrawFit(series, target, svg);
+        redrawFit(serieses, svg);
         let w = window.outerWidth;
         let h = window.outerHeight;
-        window.onorientationchange = () => redrawFit(series, target, svg);
+        window.onorientationchange = () => redrawFit(serieses, svg);
         window.onresize = () => {
             if (!(w === window.outerWidth && h === window.outerHeight)) {
                 w = window.outerWidth;
                 h = window.outerHeight;
-                redrawFit(series, target, svg);
+                redrawFit(serieses, svg);
             }
         };
         return svg;
     }
     exports.makePlot = makePlot;
-    function redrawFit(series, target, svg) {
+    function redrawFit(serieses, svg) {
         const w = window.innerWidth - 20;
         const h = Math.min(window.innerWidth - 70, window.innerHeight / 2);
-        redrawSized(series, target, svg, w, h);
+        redrawSized(serieses, svg, w, h);
     }
     exports.redrawFit = redrawFit;
-    function redrawSized(series, target, svg, width, height) {
+    function redrawSized(serieses, svg, width, height) {
         if (svg == null)
             return;
         const leftBorder = 50;
         const rightBorder = 0;
         const topBorder = 0;
         const botBorder = 50;
-        const minT = Math.min(...series.map(p => p.t.getTime()), ...target.map(p => p.t.getTime()));
-        const maxT = Math.max(...series.map(p => p.t.getTime()), ...target.map(p => p.t.getTime()));
-        const minW = Math.min(...series.map(p => p.w), ...target.map(p => p.w));
-        const maxW = Math.max(...series.map(p => p.w), ...target.map(p => p.w));
+        const minT = Math.min(...serieses.map(series => Math.min(...series.map(p => p.t.getTime()))));
+        const maxT = Math.max(...serieses.map(series => Math.max(...series.map(p => p.t.getTime()))));
+        const minW = Math.min(...serieses.map(series => Math.min(...series.map(p => p.w))));
+        const maxW = Math.max(...serieses.map(series => Math.max(...series.map(p => p.w))));
         const timeScale = d3.scaleTime()
             .domain([minT, maxT])
             .range([0, width - leftBorder - rightBorder]);
@@ -89,8 +123,10 @@ define(["require", "exports", "./series", "d3", "./menu"], function (require, ex
             .attr("opacity", "0.1")
             .call(d3.axisBottom(timeScale)
             .tickSize(-(height - topBorder - botBorder)));
-        plotSeries("steelblue", series, plot, timeScale, weightScale);
-        plotSeries("red", target, plot, timeScale, weightScale);
+        const colors = ["steelblue", "red", "green"];
+        for (let i = 0; i < serieses.length; ++i) {
+            plotSeries(colors[i], serieses[i], plot, timeScale, weightScale);
+        }
     }
     exports.redrawSized = redrawSized;
     function plotSeries(color, series, canvas, timeScale, weightScale) {
