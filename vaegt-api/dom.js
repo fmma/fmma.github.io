@@ -257,7 +257,6 @@ define(["require", "exports"], function (require, exports) {
             };
     }
     function makeSite(r) {
-        window.location.href = "#" + r.title;
         if (r) {
             if (document.body) {
                 document.body.innerHTML = "";

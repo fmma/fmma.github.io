@@ -22,7 +22,12 @@ function error(err) {
         }
 }
 
-require(["post", "dom"], function (r) {
+if(!window.location.hash)
+{
+    window.location.hash = "post";
+}
+
+require([window.location.hash.substr(1), "dom"], function (r) {
     if(r) {
         if(document.body) {
             try{
