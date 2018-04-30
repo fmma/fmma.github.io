@@ -194,9 +194,9 @@ define(["require", "exports"], function (require, exports) {
         input.value = formatTime(value, utc);
         input.onchange = () => {
             if (input.valueAsDate) {
-                value.setMinutes(input.valueAsDate.getUTCMinutes());
-                value.setHours(input.valueAsDate.getUTCHours());
-                value.setSeconds(input.valueAsDate.getUTCSeconds());
+                value.setUTCMinutes(input.valueAsDate.getUTCMinutes());
+                value.setUTCHours(input.valueAsDate.getUTCHours());
+                value.setUTCSeconds(input.valueAsDate.getUTCSeconds());
                 onchange();
             }
         };

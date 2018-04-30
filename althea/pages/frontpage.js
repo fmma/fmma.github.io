@@ -12,7 +12,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
     function makeSite(parent) {
         return __awaiter(this, void 0, void 0, function* () {
             const model = yield model_1.loadModel();
-            drawSite(parent, model);
+            drawSite(parent, model, new Date(12 * 3600 * 1000) /*12 hours*/);
             setInterval(() => {
                 tickFuns.sleep();
                 tickFuns.feed();
@@ -24,7 +24,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
         sleep: () => { },
         feed: () => { }
     };
-    function drawSite(parent, model) {
+    function drawSite(parent, model, reso) {
         function makeGantt() {
             const svg = parent._svg();
             const canvas = d3.select(svg);
@@ -32,10 +32,10 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             const rightBorder = 0;
             const topBorder = 0;
             const botBorder = 50;
-            const height = 300;
             const width = window.innerWidth - leftBorder - rightBorder;
+            const height = width / 5;
             const today = new Date().getTime();
-            const minT = today - 12 * 3600 * 1000; // Math.min(Math.min(... model.sleep.map(p => p.t0)), Math.min(... model.feed.map(p => p.t0))) - 10000;
+            const minT = today - reso.getTime(); // Math.min(Math.min(... model.sleep.map(p => p.t0)), Math.min(... model.feed.map(p => p.t0))) - 10000;
             const maxT = today;
             canvas.attr('width', width);
             canvas.attr('height', height);
@@ -60,20 +60,26 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                 .attr("opacity", "0.1")
                 .call(d3.axisBottom(timeScale)
                 .tickSize(-(height - topBorder - botBorder)));
+            const barHeight = (height - botBorder - botBorder) / 4;
             canvas.selectAll("foo").data(model.feed).enter().append("rect")
                 .style("fill", "steelblue")
                 .attr("x", p => {
                 return timeScale(p.t0);
             })
                 .attr("width", p => 1 + timeScale(p.t1 || new Date().getTime()) - timeScale(p.t0))
-                .attr("y", d => 100)
-                .attr("height", d => 50);
+                .attr("y", d => botBorder + barHeight)
+                .attr("height", d => barHeight);
             canvas.selectAll("bar").data(model.sleep).enter().append("rect")
                 .style("fill", "red")
                 .attr("x", p => timeScale(p.t0))
                 .attr("width", p => 1 + timeScale((p.t1 || new Date().getTime())) - timeScale(p.t0))
-                .attr("y", d => 200)
-                .attr("height", d => 50);
+                .attr("y", d => botBorder + 3 * barHeight)
+                .attr("height", d => barHeight);
+            const inputReso = parent._inputTime(reso, () => {
+                // drawSite(parent, model, reso);
+            }, true);
+            inputReso.style.width = "25%";
+            inputReso.min = "1";
         }
         function timeContainer(div, open, width4) {
             const timeContainer = div._span();
@@ -85,7 +91,6 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
         }
         function makeControl(key) {
             const width4 = "25%";
-            console.log(width4);
             const displayName = key === "sleep" ? "Søvn" : "Amning";
             const series = model[key];
             const open = series.length > 0 && series[series.length - 1].t1 == null;
@@ -95,20 +100,20 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                 const button = div._button("Slut", () => {
                     series[series.length - 1].t1 = new Date().getTime();
                     model_1.saveModel(model);
-                    drawSite(parent, model);
+                    drawSite(parent, model, reso);
                 });
                 button.style.width = width4;
                 const time = timeContainer(div, true, width4)._text(dom_1.formatTime(new Date(new Date().getTime() - series[series.length - 1].t0), true));
                 tickFuns[key] = () => {
                     time.textContent = dom_1.formatTime(new Date(new Date().getTime() - series[series.length - 1].t0), true);
-                    drawSite(parent, model);
+                    drawSite(parent, model, reso);
                 };
             }
             else {
                 const button = div._button("Start", () => {
                     model[key].push({ t0: new Date().getTime() });
                     model_1.saveModel(model);
-                    drawSite(parent, model);
+                    drawSite(parent, model, reso);
                 });
                 button.style.width = width4;
                 if (series.length > 0) {
@@ -118,7 +123,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                     const time = timeContainer(div, false, width4)._text(dom_1.formatTime(new Date(new Date().getTime() - t), true));
                     tickFuns[key] = () => {
                         time.textContent = dom_1.formatTime(new Date(new Date().getTime() - t), true);
-                        drawSite(parent, model);
+                        drawSite(parent, model, reso);
                     };
                 }
                 else {
@@ -129,7 +134,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             const regret = div._button("Fortryd", () => {
                 series.pop();
                 model_1.saveModel(model);
-                drawSite(parent, model);
+                drawSite(parent, model, reso);
             });
             regret.hidden = !open;
             regret.style.width = width4;
