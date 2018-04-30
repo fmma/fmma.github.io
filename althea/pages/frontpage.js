@@ -33,7 +33,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             const topBorder = 0;
             const botBorder = 50;
             const width = window.innerWidth - leftBorder - rightBorder;
-            const height = width / 5;
+            const height = width / 5 + topBorder + botBorder;
             const today = new Date().getTime();
             const minT = today - reso.getTime(); // Math.min(Math.min(... model.sleep.map(p => p.t0)), Math.min(... model.feed.map(p => p.t0))) - 10000;
             const maxT = today;
