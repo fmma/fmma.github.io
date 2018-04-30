@@ -4,6 +4,7 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
     const userID = "althea";
     function saveModel(model) {
         if (location.hostname == "localhost") {
+            console.warn("Hostname is localhost. Save will not persist.");
             seriesCache[name] = model;
             return;
         }
@@ -40,8 +41,6 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
     function loadModel() {
         if (seriesCache[userID])
             return Promise.resolve(seriesCache[userID]);
-        if (location.hostname == "localhost")
-            return Promise.resolve({ feed: [], sleep: [] });
         return new Promise((resolve, reject) => {
             const docClient = new aws.DynamoDB.DocumentClient({
                 region: "eu-west-1",

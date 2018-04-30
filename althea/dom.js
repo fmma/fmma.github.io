@@ -37,6 +37,9 @@ define(["require", "exports"], function (require, exports) {
     Node.prototype._div = function () {
         return this.provideNode(() => document.createElement("div"));
     };
+    Node.prototype._span = function () {
+        return this.provideNode(() => document.createElement("span"));
+    };
     Node.prototype._form = function () {
         const form = this.provideNode(() => document.createElement("form"));
         return form;

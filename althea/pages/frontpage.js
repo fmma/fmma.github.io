@@ -75,48 +75,62 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                 .attr("y", d => 200)
                 .attr("height", d => 50);
         }
+        function timeContainer(div, open) {
+            const timeContainer = div._span();
+            timeContainer.style.fontWeight = open ? "bold" : "normal";
+            timeContainer.style.width = "80px";
+            timeContainer.style.textAlign = "center";
+            timeContainer.style.display = "inline-block";
+            return timeContainer;
+        }
         function makeControl(key) {
-            const displayName = key === "sleep" ? "søvn" : "amning";
+            const displayName = key === "sleep" ? "Søvn" : "Amning";
             const series = model[key];
             const open = series.length > 0 && series[series.length - 1].t1 == null;
             const div = parent._div();
+            timeContainer(div, false)._text(displayName + ": ");
             if (open) {
-                div._button("Slut " + displayName, () => {
+                const button = div._button("Slut", () => {
                     series[series.length - 1].t1 = new Date().getTime();
                     model_1.saveModel(model);
                     drawSite(parent, model);
                 });
-                const time = div._inputTime(new Date(new Date().getTime() - series[series.length - 1].t0), () => { }, true);
+                button.style.width = "80px";
+                const time = timeContainer(div, true)._text(dom_1.formatTime(new Date(new Date().getTime() - series[series.length - 1].t0), true));
                 tickFuns[key] = () => {
-                    time.value = dom_1.formatTime(new Date(new Date().getTime() - series[series.length - 1].t0), true);
+                    time.textContent = dom_1.formatTime(new Date(new Date().getTime() - series[series.length - 1].t0), true);
                     drawSite(parent, model);
                 };
-                time.disabled = true;
-                time.hidden = false;
             }
             else {
-                div._button("Start " + displayName, () => {
+                const button = div._button("Start", () => {
                     model[key].push({ t0: new Date().getTime() });
                     model_1.saveModel(model);
                     drawSite(parent, model);
                 });
+                button.style.width = "80px";
                 if (series.length > 0) {
                     const t = series[series.length - 1].t1;
                     if (t == null)
                         throw "";
-                    const time = div._inputTime(new Date(new Date().getTime() - t), () => { }, true);
+                    const time = timeContainer(div, false)._text(dom_1.formatTime(new Date(new Date().getTime() - t), true));
                     tickFuns[key] = () => {
-                        time.value = dom_1.formatTime(new Date(new Date().getTime() - t), true);
+                        time.textContent = dom_1.formatTime(new Date(new Date().getTime() - t), true);
                         drawSite(parent, model);
                     };
-                    time.disabled = true;
-                    time.hidden = false;
                 }
                 else {
-                    div._inputTime(new Date(), () => { }, true).hidden = true;
+                    const time = timeContainer(div, false)._text("");
                     tickFuns[key] = () => { };
                 }
             }
+            const regret = div._button("Fortryd", () => {
+                series.pop();
+                model_1.saveModel(model);
+                drawSite(parent, model);
+            });
+            regret.hidden = !open;
+            regret.style.width = "80px";
         }
         parent._draw(() => {
             makeControl("sleep");
