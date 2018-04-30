@@ -60,20 +60,20 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                 .attr("opacity", "0.1")
                 .call(d3.axisBottom(timeScale)
                 .tickSize(-(height - topBorder - botBorder)));
-            const barHeight = (height - botBorder - botBorder) / 4;
+            const barHeight = (height - botBorder) / 4;
             canvas.selectAll("foo").data(model.feed).enter().append("rect")
                 .style("fill", "steelblue")
                 .attr("x", p => {
                 return timeScale(p.t0);
             })
                 .attr("width", p => 1 + timeScale(p.t1 || new Date().getTime()) - timeScale(p.t0))
-                .attr("y", d => botBorder + barHeight)
+                .attr("y", d => topBorder + barHeight)
                 .attr("height", d => barHeight);
             canvas.selectAll("bar").data(model.sleep).enter().append("rect")
                 .style("fill", "red")
                 .attr("x", p => timeScale(p.t0))
                 .attr("width", p => 1 + timeScale((p.t1 || new Date().getTime())) - timeScale(p.t0))
-                .attr("y", d => botBorder + 3 * barHeight)
+                .attr("y", d => topBorder + 3 * barHeight)
                 .attr("height", d => barHeight);
             const inputReso = parent._inputTime(reso, () => {
                 // drawSite(parent, model, reso);
