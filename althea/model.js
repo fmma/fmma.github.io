@@ -3,6 +3,10 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
     Object.defineProperty(exports, "__esModule", { value: true });
     const userID = "althea";
     function saveModel(model) {
+        if (location.hostname == "localhost") {
+            seriesCache[name] = model;
+            return;
+        }
         const docClient = new aws.DynamoDB.DocumentClient({
             region: "eu-west-1",
             endpoint: "https://dynamodb.eu-west-1.amazonaws.com",
@@ -36,6 +40,8 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
     function loadModel() {
         if (seriesCache[userID])
             return Promise.resolve(seriesCache[userID]);
+        if (location.hostname == "localhost")
+            return Promise.resolve({ feed: [], sleep: [] });
         return new Promise((resolve, reject) => {
             const docClient = new aws.DynamoDB.DocumentClient({
                 region: "eu-west-1",
