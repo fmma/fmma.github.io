@@ -28,12 +28,12 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
         function makeGantt() {
             const svg = parent._svg();
             const canvas = d3.select(svg);
-            const width = 500;
-            const height = 300;
             const leftBorder = 50;
             const rightBorder = 0;
             const topBorder = 0;
             const botBorder = 50;
+            const height = 300;
+            const width = window.innerWidth - leftBorder - rightBorder;
             const today = new Date().getTime();
             const minT = today - 12 * 3600 * 1000; // Math.min(Math.min(... model.sleep.map(p => p.t0)), Math.min(... model.feed.map(p => p.t0))) - 10000;
             const maxT = today;
@@ -75,28 +75,30 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                 .attr("y", d => 200)
                 .attr("height", d => 50);
         }
-        function timeContainer(div, open) {
+        function timeContainer(div, open, width4) {
             const timeContainer = div._span();
             timeContainer.style.fontWeight = open ? "bold" : "normal";
-            timeContainer.style.width = "80px";
+            timeContainer.style.width = width4;
             timeContainer.style.textAlign = "center";
             timeContainer.style.display = "inline-block";
             return timeContainer;
         }
         function makeControl(key) {
+            const width4 = "25%";
+            console.log(width4);
             const displayName = key === "sleep" ? "Søvn" : "Amning";
             const series = model[key];
             const open = series.length > 0 && series[series.length - 1].t1 == null;
             const div = parent._div();
-            timeContainer(div, false)._text(displayName + ": ");
+            timeContainer(div, false, width4)._text(displayName + ": ");
             if (open) {
                 const button = div._button("Slut", () => {
                     series[series.length - 1].t1 = new Date().getTime();
                     model_1.saveModel(model);
                     drawSite(parent, model);
                 });
-                button.style.width = "80px";
-                const time = timeContainer(div, true)._text(dom_1.formatTime(new Date(new Date().getTime() - series[series.length - 1].t0), true));
+                button.style.width = width4;
+                const time = timeContainer(div, true, width4)._text(dom_1.formatTime(new Date(new Date().getTime() - series[series.length - 1].t0), true));
                 tickFuns[key] = () => {
                     time.textContent = dom_1.formatTime(new Date(new Date().getTime() - series[series.length - 1].t0), true);
                     drawSite(parent, model);
@@ -108,19 +110,19 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                     model_1.saveModel(model);
                     drawSite(parent, model);
                 });
-                button.style.width = "80px";
+                button.style.width = width4;
                 if (series.length > 0) {
                     const t = series[series.length - 1].t1;
                     if (t == null)
                         throw "";
-                    const time = timeContainer(div, false)._text(dom_1.formatTime(new Date(new Date().getTime() - t), true));
+                    const time = timeContainer(div, false, width4)._text(dom_1.formatTime(new Date(new Date().getTime() - t), true));
                     tickFuns[key] = () => {
                         time.textContent = dom_1.formatTime(new Date(new Date().getTime() - t), true);
                         drawSite(parent, model);
                     };
                 }
                 else {
-                    const time = timeContainer(div, false)._text("");
+                    const time = timeContainer(div, false, width4)._text("");
                     tickFuns[key] = () => { };
                 }
             }
@@ -130,7 +132,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                 drawSite(parent, model);
             });
             regret.hidden = !open;
-            regret.style.width = "80px";
+            regret.style.width = width4;
         }
         parent._draw(() => {
             makeControl("sleep");
