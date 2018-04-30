@@ -143,6 +143,9 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             makeControl("sleep");
             makeControl("feed");
             makeGantt();
+            twerp += 0.1;
+            parent._div()._img("resources/apple-icon-180x180.png").style.marginLeft = ((window.innerWidth - 200) * (0.5 + Math.cos(twerp) / 2)) + "px";
         });
     }
+    let twerp = 0.0;
 });

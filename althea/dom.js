@@ -142,6 +142,11 @@ define(["require", "exports"], function (require, exports) {
         };
         return pagedTable;
     };
+    Node.prototype._img = function (src) {
+        const result = this.provideNode(() => document.createElement("img"));
+        result.src = src;
+        return result;
+    };
     Node.prototype._text = function (text) {
         const result = this.provideNode(() => document.createTextNode(""));
         result.textContent = text;
