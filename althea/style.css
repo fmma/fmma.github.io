@@ -1,0 +1,45 @@
+input, button {
+  font-size: 16px;
+}
+
+button.linklike {
+  background:none!important;
+  color:inherit;
+  border:none; 
+  padding:0!important;
+  font: inherit;
+  /*border is optional*/
+  border-bottom:1px solid #444; 
+  cursor: pointer;
+}
+
+div.big, a.big, input.big, button.big {
+  width: 80%;
+  font-size: 200%;
+}
+
+div.data {
+  margin-top:33px;
+}
+
+div.menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: "white";
+  z-index: 3;
+  background: rgba(255, 255, 255, 1);
+  border-bottom: 3px solid #73AD21;
+}
+
+div.plot {
+  position: fixed;
+  top: 30;
+  right: 0;
+  width: 500px;
+  z-index: 2;
+  background: rgba(255, 255, 255, 1);
+  border-left: 3px solid #73AD21;
+  border-bottom: 3px solid #73AD21;
+}
