@@ -290,9 +290,10 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             });
             const today = new Date().getTime();
             const w = { t0: avgMode == 0 ? today - 24 * 3600 * 1000 : avgMode == 1 ? today - 7 * 24 * 3600 * 1000 : 0, t1: today };
-            parent._paragraph("Gennemsnit amning: " + dom_1.formatTime(new Date(model_1.average(model_1.sliceWindow(model.feed, w))), true));
-            parent._paragraph("Gennemsnit søvn: " + dom_1.formatTime(new Date(model_1.average(model_1.sliceWindow(model.sleep, w))), true));
-            parent._paragraph("Gennemsnit vågen: " + dom_1.formatTime(new Date(model_1.average(model_1.invert(model_1.sliceWindow(model.sleep, w)))), true));
+            parent._paragraph("Gennemsnit amning: " + dom_1.formatTime(new Date(model_1.average(model_1.sliceWindow(model.feed, w, false))), true));
+            parent._paragraph("Gennemsnit søvn: " + dom_1.formatTime(new Date(model_1.average(model_1.sliceWindow(model.sleep, w, false))), true));
+            parent._paragraph("Total søvn: " + dom_1.formatTime(new Date(model_1.total(model_1.sliceWindow(model.sleep, w, true))), true));
+            parent._paragraph("Gennemsnit vågen: " + dom_1.formatTime(new Date(model_1.average(model_1.invert(model_1.sliceWindow(model.sleep, w, false)))), true));
             const img = parent._div()._img("resources/apple-icon-180x180.png");
             tickFuns.anim = () => {
                 twerp += 0.01;

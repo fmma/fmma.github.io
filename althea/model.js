@@ -2,9 +2,20 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const userID = "althea";
-    function sliceWindow(series, p) {
+    function sliceWindow(series, p, cutoff) {
         const today = new Date().getTime();
-        return series.filter(p0 => p0.t0 < (p.t1 || today) && p.t0 < (p0.t1 || today));
+        const result = series.filter(p0 => p0.t0 < (p.t1 || today) && p.t0 < (p0.t1 || today));
+        if (cutoff && result.length > 0) {
+            result[0] =
+                { t0: result[0].t0 < p.t0 ? p.t0 : result[0].t0,
+                    t1: result[0].t1
+                };
+            result[result.length - 1] =
+                { t0: result[result.length - 1].t0,
+                    t1: (result[result.length - 1].t1 || today) > (p.t1 || today) ? (p.t1 || today) : (result[result.length - 1].t1 || today)
+                };
+        }
+        return result;
     }
     exports.sliceWindow = sliceWindow;
     function closed(series) {
@@ -33,6 +44,13 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
         return result;
     }
     exports.invert = invert;
+    function total(series) {
+        const lengths = closed(series).map(({ t0: t0, t1: t1 }) => t1 - t0);
+        if (lengths.length === 0)
+            return 0;
+        return lengths.reduce((a, b) => a + b);
+    }
+    exports.total = total;
     function average(series) {
         const lengths = closed(series).map(({ t0: t0, t1: t1 }) => t1 - t0);
         if (lengths.length === 0)
