@@ -2,6 +2,44 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const userID = "althea";
+    function sliceWindow(series, p) {
+        const today = new Date().getTime();
+        return series.filter(p0 => p0.t0 < (p.t1 || today) && p.t0 < (p0.t1 || today));
+    }
+    exports.sliceWindow = sliceWindow;
+    function closed(series) {
+        const result = [];
+        for (let i = 0; i < series.length; ++i) {
+            const p = series[i];
+            if (p.t1 != null) {
+                result.push({ t0: p.t0, t1: p.t1 });
+            }
+        }
+        return result;
+    }
+    exports.closed = closed;
+    function invert(series) {
+        const result = [];
+        if (series.length === 0)
+            return result;
+        let t = series[0].t1;
+        for (let i = 0; i < series.length; ++i) {
+            const p = series[i];
+            if (t != null) {
+                result.push({ t0: t, t1: p.t0 });
+            }
+            t = p.t1;
+        }
+        return result;
+    }
+    exports.invert = invert;
+    function average(series) {
+        const lengths = closed(series).map(({ t0: t0, t1: t1 }) => t1 - t0);
+        if (lengths.length === 0)
+            return 0;
+        return lengths.reduce((a, b) => a + b) / lengths.length;
+    }
+    exports.average = average;
     function saveModel(model) {
         if (location.hostname == "localhost") {
             console.warn("Hostname is localhost. Save will not persist.");
@@ -62,6 +100,11 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
                 else {
                     if (data.Item != null) {
                         const model = data.Item["m"];
+                        /*
+                        model.feed.forEach(p => {
+                            p.h = Boolean(Math.round(Math.random()));
+                            p.v = Boolean(Math.round(Math.random()));
+                        }) */
                         resolve(model);
                     }
                     else {

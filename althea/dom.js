@@ -4,25 +4,27 @@ define(["require", "exports"], function (require, exports) {
     Node.prototype._draw = function (block) {
         this.lastReuseId = this.reuseId == null ? 0 : this.reuseId;
         this.reuseId = 1;
+        this.reuses = this.reuses ? this.reuses : {};
         block();
         for (let i = this.reuseId; i < this.lastReuseId; ++i) {
-            this.removeChild(this[i]);
-            delete this[i];
+            this.removeChild(this.reuses[i]);
+            delete this.reuses[i];
         }
     };
     Node.prototype.provideNode = function (create) {
         if (this.reuseId == null) {
             return this.appendChild(create());
         }
-        let old = this[this.reuseId];
-        if (old == null) {
-            old = create();
-            this.appendChild(old);
-            this[this.reuseId] = old;
+        let child = this.reuses[this.reuseId];
+        if (child == null) {
+            child = create();
+            child.reuses = {};
+            this.appendChild(child);
+            this.reuses[this.reuseId] = child;
         }
-        old.reuseId = 1;
+        child.reuseId = 1;
         this.reuseId++;
-        return old;
+        return child;
     };
     Element.prototype._class = function (className) {
         this.className = className;
@@ -258,6 +260,20 @@ define(["require", "exports"], function (require, exports) {
         const p = this.provideNode(() => document.createElement("p"));
         p.innerHTML = text;
         return p;
+    };
+    Node.prototype._select = function (options, j, onchange = () => { }) {
+        const sel = this.provideNode(() => document.createElement("select"));
+        sel.selectedIndex = j;
+        sel.onchange = (x) => {
+            if (sel.selectedIndex >= 0 && sel.selectedIndex < options.length)
+                onchange(sel.selectedIndex);
+        };
+        for (let i = 0; i < options.length; ++i) {
+            const opt = sel.provideNode(() => document.createElement("option"));
+            opt.textContent = options[i];
+            opt.value = options[i];
+        }
+        return sel;
     };
     function error(err) {
         const msg = "Øv der er sket en fejl: ";

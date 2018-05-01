@@ -13,13 +13,18 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
         return __awaiter(this, void 0, void 0, function* () {
             const div = parent._div();
             const model = yield model_1.loadModel();
-            drawSite(div, model, new Date(12 * 3600 * 1000) /*12 hours*/);
+            drawSite(div, model, new Date(12 * 3600 * 1000) /*12 hours*/, 0);
             setInterval(() => {
                 tickFuns.sleep();
                 tickFuns.feed();
                 tickFuns.sleepNext();
                 tickFuns.feedNext();
             }, 1000);
+            const animFix = () => window.requestAnimationFrame(() => {
+                tickFuns.anim();
+                animFix();
+            });
+            animFix();
         });
     }
     exports.makeSite = makeSite;
@@ -27,10 +32,11 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
         sleep: () => { },
         feed: () => { },
         sleepNext: () => { },
-        feedNext: () => { }
+        feedNext: () => { },
+        anim: () => { }
     };
     let offset = 0;
-    function drawSite(parent, model, reso) {
+    function drawSite(parent, model, reso, avgMode) {
         function makeGantt() {
             function drawGanttPlot(svg) {
                 const leftBorder = 50;
@@ -73,12 +79,49 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                     ctxt.textContent = formatTime(new Date(timeScale.invert(p[0] - leftBorder)), false);
                 });
                 */
+                /*
                 feeds
                     .style("fill", "steelblue")
                     .attr("x", p => leftBorder + timeScale(p.t0))
                     .attr("width", p => 1 + timeScale(p.t1 || new Date().getTime()) - timeScale(p.t0))
                     .attr("y", d => topBorder + barHeight)
                     .attr("height", d => barHeight);
+                */
+                const line = d3.line();
+                feedsHV
+                    .attr("d", p => line(p.h && p.v
+                    ? [[leftBorder + timeScale(p.t0) + 1, topBorder + barHeight],
+                        [leftBorder + timeScale(p.t0) + 1 - barHeight / 5, topBorder + 1.5 * barHeight],
+                        [leftBorder + timeScale(p.t0) + 1, topBorder + 2 * barHeight],
+                        [leftBorder + timeScale(p.t1 || new Date().getTime()), topBorder + 2 * barHeight],
+                        [leftBorder + timeScale(p.t1 || new Date().getTime()) + barHeight / 5, topBorder + 1.5 * barHeight],
+                        [leftBorder + timeScale(p.t1 || new Date().getTime()), topBorder + barHeight]
+                    ]
+                    : p.v
+                        ? [[leftBorder + timeScale(p.t0) + 1, topBorder + barHeight],
+                            [leftBorder + timeScale(p.t0) + 1 - barHeight / 5, topBorder + 1.5 * barHeight],
+                            [leftBorder + timeScale(p.t0) + 1, topBorder + 2 * barHeight],
+                            [leftBorder + timeScale(p.t1 || new Date().getTime()), topBorder + 2 * barHeight],
+                            [leftBorder + timeScale(p.t1 || new Date().getTime()), topBorder + 1.5 * barHeight],
+                            [leftBorder + timeScale(p.t1 || new Date().getTime()), topBorder + barHeight]
+                        ]
+                        : p.h
+                            ? [[leftBorder + timeScale(p.t0) + 1, topBorder + barHeight],
+                                [leftBorder + timeScale(p.t0) + 1, topBorder + 1.5 * barHeight],
+                                [leftBorder + timeScale(p.t0) + 1, topBorder + 2 * barHeight],
+                                [leftBorder + timeScale(p.t1 || new Date().getTime()), topBorder + 2 * barHeight],
+                                [leftBorder + timeScale(p.t1 || new Date().getTime()) + barHeight / 5, topBorder + 1.5 * barHeight],
+                                [leftBorder + timeScale(p.t1 || new Date().getTime()), topBorder + barHeight]
+                            ]
+                            : [[leftBorder + timeScale(p.t0) + 1, topBorder + barHeight],
+                                [leftBorder + timeScale(p.t0) + 1, topBorder + 1.5 * barHeight],
+                                [leftBorder + timeScale(p.t0) + 1, topBorder + 2 * barHeight],
+                                [leftBorder + timeScale(p.t1 || new Date().getTime()), topBorder + 2 * barHeight],
+                                [leftBorder + timeScale(p.t1 || new Date().getTime()), topBorder + 1.5 * barHeight],
+                                [leftBorder + timeScale(p.t1 || new Date().getTime()), topBorder + barHeight]
+                            ]))
+                    .attr("stroke", "steelblue")
+                    .attr("fill", "steelblue");
                 sleeps
                     .style("fill", "red")
                     .attr("x", p => leftBorder + timeScale(p.t0))
@@ -132,6 +175,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             const xaxis = canvas.append("g");
             const grid = canvas.append("g");
             const feeds = canvas.selectAll("foo").data(model.feed).enter().append("rect");
+            const feedsHV = canvas.selectAll("foobar").data(model.feed).enter().append("path");
             const sleeps = canvas.selectAll("bar").data(model.sleep).enter().append("rect");
             drawGanttPlot(svg);
         }
@@ -154,8 +198,13 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             if (open) {
                 const button = div._button("Slut", () => {
                     series[series.length - 1].t1 = new Date().getTime();
+                    if (key === "feed") {
+                        series[series.length - 1].h = bh;
+                        series[series.length - 1].v = bv;
+                        console.log(series[series.length - 1]);
+                    }
                     model_1.saveModel(model);
-                    drawSite(parent, model, reso);
+                    drawSite(parent, model, reso, avgMode);
                 });
                 button.style.width = width4;
                 const time = timeContainer(div, true, width4)._text(dom_1.formatTime(new Date(new Date().getTime() - series[series.length - 1].t0), true));
@@ -168,7 +217,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                 const button = div._button("Start", () => {
                     model[key].push({ t0: new Date().getTime() });
                     model_1.saveModel(model);
-                    drawSite(parent, model, reso);
+                    drawSite(parent, model, reso, avgMode);
                 });
                 button.style.width = width4;
                 if (series.length > 0) {
@@ -188,7 +237,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             const regret = div._button("Fortryd", () => {
                 series.pop();
                 model_1.saveModel(model);
-                drawSite(parent, model, reso);
+                drawSite(parent, model, reso, avgMode);
             });
             regret.hidden = !open;
             regret.style.width = width4;
@@ -216,13 +265,41 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                 cont._text("");
                 tickFuns[key + "Next"] = () => { };
             }
+            let bh = false;
+            let bv = false;
+            if (key == "feed") {
+                if (series.length > 0) {
+                    bh = series[series.length - 1].h || false;
+                    bv = series[series.length - 1].v || false;
+                }
+                timeContainer(parent, true, "25%");
+                const hv = timeContainer(parent, false, "25%");
+                const disabled = !(model.feed.length > 0 && model.feed[model.feed.length - 1].t1 == null);
+                hv._text("V");
+                hv._checkbox(bv, b => { bv = b; }).disabled = disabled;
+                hv._text("H");
+                hv._checkbox(bh, b => { bh = b; }).disabled = disabled;
+            }
         }
         parent._draw(() => {
             makeControl("sleep");
             makeControl("feed");
             makeGantt();
-            twerp += 0.1;
-            parent._div()._img("resources/apple-icon-180x180.png").style.marginLeft = ((window.innerWidth - 200) * (0.5 + Math.cos(twerp) / 2)) + "px";
+            const sel = parent._select(["24 timer", "en uge", "for altid"], avgMode, i => {
+                drawSite(parent, model, reso, i);
+            });
+            const today = new Date().getTime();
+            const w = { t0: avgMode == 0 ? today - 24 * 3600 * 1000 : avgMode == 1 ? today - 7 * 24 * 3600 * 1000 : 0, t1: today };
+            parent._paragraph("Gennemsnit amning: " + dom_1.formatTime(new Date(model_1.average(model_1.sliceWindow(model.feed, w))), true));
+            parent._paragraph("Gennemsnit søvn: " + dom_1.formatTime(new Date(model_1.average(model_1.sliceWindow(model.sleep, w))), true));
+            parent._paragraph("Gennemsnit vågen: " + dom_1.formatTime(new Date(model_1.average(model_1.invert(model_1.sliceWindow(model.sleep, w)))), true));
+            const img = parent._div()._img("resources/apple-icon-180x180.png");
+            tickFuns.anim = () => {
+                twerp += 0.01;
+                img.style.marginLeft = ((window.innerWidth - 200) * (0.5 + Math.cos(twerp) / 2)) + "px";
+                img.style.width = (90 + 90 * (0.5 + Math.cos(10 * twerp) / 2)) + "px";
+                img.style.height = "auto";
+            };
         });
     }
     let twerp = 0.0;
