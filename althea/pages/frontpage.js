@@ -63,15 +63,13 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             const barHeight = (height - botBorder) / 4;
             canvas.selectAll("foo").data(model.feed).enter().append("rect")
                 .style("fill", "steelblue")
-                .attr("x", p => {
-                return timeScale(p.t0);
-            })
+                .attr("x", p => leftBorder + timeScale(p.t0))
                 .attr("width", p => 1 + timeScale(p.t1 || new Date().getTime()) - timeScale(p.t0))
                 .attr("y", d => topBorder + barHeight)
                 .attr("height", d => barHeight);
             canvas.selectAll("bar").data(model.sleep).enter().append("rect")
                 .style("fill", "red")
-                .attr("x", p => timeScale(p.t0))
+                .attr("x", p => leftBorder + timeScale(p.t0))
                 .attr("width", p => 1 + timeScale((p.t1 || new Date().getTime())) - timeScale(p.t0))
                 .attr("y", d => topBorder + 3 * barHeight)
                 .attr("height", d => barHeight);
@@ -92,6 +90,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
         function makeControl(key) {
             const width4 = "25%";
             const displayName = key === "sleep" ? "Søvn" : "Amning";
+            const nextTime = key === "sleep" ? 1.5 : 2.5;
             const series = model[key];
             const open = series.length > 0 && series[series.length - 1].t1 == null;
             const div = parent._div();
@@ -120,11 +119,8 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                     const t = series[series.length - 1].t1;
                     if (t == null)
                         throw "";
-                    const time = timeContainer(div, false, width4)._text(dom_1.formatTime(new Date(new Date().getTime() - t), true));
-                    tickFuns[key] = () => {
-                        time.textContent = dom_1.formatTime(new Date(new Date().getTime() - t), true);
-                        drawSite(parent, model, reso);
-                    };
+                    const time = timeContainer(div, false, width4)._text(dom_1.formatTime(new Date(t + nextTime * 3600 * 1000), false));
+                    tickFuns[key] = () => { };
                 }
                 else {
                     const time = timeContainer(div, false, width4)._text("");
