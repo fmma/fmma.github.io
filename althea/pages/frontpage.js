@@ -15,6 +15,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             const model = yield model_1.loadModel();
             drawSite(div, model, new Date(12 * 3600 * 1000) /*12 hours*/, 0);
             setInterval(() => {
+                tickFuns.sleepTotal();
                 tickFuns.sleep();
                 tickFuns.feed();
                 tickFuns.sleepNext();
@@ -29,6 +30,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
     }
     exports.makeSite = makeSite;
     const tickFuns = {
+        sleepTotal: () => { },
         sleep: () => { },
         feed: () => { },
         sleepNext: () => { },
@@ -292,7 +294,12 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             const w = { t0: avgMode == 0 ? today - 24 * 3600 * 1000 : avgMode == 1 ? today - 7 * 24 * 3600 * 1000 : 0, t1: today };
             parent._paragraph("Gennemsnit amning: " + dom_1.formatTime(new Date(model_1.average(model_1.sliceWindow(model.feed, w, false))), true));
             parent._paragraph("Gennemsnit søvn: " + dom_1.formatTime(new Date(model_1.average(model_1.sliceWindow(model.sleep, w, false))), true));
-            parent._paragraph("Total søvn: " + dom_1.formatTime(new Date(model_1.total(model_1.sliceWindow(model.sleep, w, true))), true));
+            const sleepTotal = parent._paragraph("Total søvn: " + dom_1.formatTime(new Date(model_1.total(model_1.sliceWindow(model.sleep, w, true))), true));
+            tickFuns.sleepTotal = () => {
+                const today = new Date().getTime();
+                const w = { t0: avgMode == 0 ? today - 24 * 3600 * 1000 : avgMode == 1 ? today - 7 * 24 * 3600 * 1000 : 0, t1: today };
+                sleepTotal.textContent = "Total søvn: " + dom_1.formatTime(new Date(model_1.total(model_1.sliceWindow(model.sleep, w, true))), true);
+            };
             parent._paragraph("Gennemsnit vågen: " + dom_1.formatTime(new Date(model_1.average(model_1.invert(model_1.sliceWindow(model.sleep, w, false)))), true));
             const img = parent._div()._img("resources/apple-icon-180x180.png");
             tickFuns.anim = () => {
