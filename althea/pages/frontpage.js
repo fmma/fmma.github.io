@@ -11,73 +11,129 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
     Object.defineProperty(exports, "__esModule", { value: true });
     function makeSite(parent) {
         return __awaiter(this, void 0, void 0, function* () {
+            const div = parent._div();
             const model = yield model_1.loadModel();
-            drawSite(parent, model, new Date(12 * 3600 * 1000) /*12 hours*/);
+            drawSite(div, model, new Date(12 * 3600 * 1000) /*12 hours*/);
             setInterval(() => {
                 tickFuns.sleep();
                 tickFuns.feed();
+                tickFuns.sleepNext();
+                tickFuns.feedNext();
             }, 1000);
         });
     }
     exports.makeSite = makeSite;
     const tickFuns = {
         sleep: () => { },
-        feed: () => { }
+        feed: () => { },
+        sleepNext: () => { },
+        feedNext: () => { }
     };
+    let offset = 0;
     function drawSite(parent, model, reso) {
         function makeGantt() {
-            const svg = parent._svg();
-            const canvas = d3.select(svg);
-            const leftBorder = 50;
-            const rightBorder = 0;
-            const topBorder = 0;
-            const botBorder = 50;
-            const width = window.innerWidth - leftBorder - rightBorder;
-            const height = width / 5 + topBorder + botBorder;
-            const today = new Date().getTime();
-            const minT = today - reso.getTime(); // Math.min(Math.min(... model.sleep.map(p => p.t0)), Math.min(... model.feed.map(p => p.t0))) - 10000;
-            const maxT = today;
-            canvas.attr('width', width);
-            canvas.attr('height', height);
-            const plot = canvas.append("g")
-                .attr("transform", "translate(" + leftBorder + ", " + topBorder + ")");
-            const timeScale = d3.scaleTime()
-                .domain([minT, maxT])
-                .range([0, width - leftBorder - rightBorder]);
-            canvas.html("");
-            canvas.append("g")
-                .attr("class", "xaxis")
-                .attr("transform", "translate(" + leftBorder + ", " + (height - botBorder) + ")")
-                .call(d3.axisBottom(timeScale)
-                .tickPadding(10));
-            const qq = canvas.selectAll(".xaxis text");
-            qq.attr("transform", function (d) {
-                return "translate(" + this.getBBox().height * -2 + "," + this.getBBox().height + ")rotate(-45)";
+            function drawGanttPlot(svg) {
+                const leftBorder = 50;
+                const rightBorder = 0;
+                const topBorder = 0;
+                const botBorder = 50;
+                const width = window.innerWidth - leftBorder - rightBorder;
+                const height = width / 5 + topBorder + botBorder;
+                const today = new Date().getTime();
+                const minT = offset + today - reso.getTime(); // Math.min(Math.min(... model.sleep.map(p => p.t0)), Math.min(... model.feed.map(p => p.t0))) - 10000;
+                const maxT = offset + today;
+                canvas.attr('width', width);
+                canvas.attr('height', height);
+                plot.attr("transform", "translate(" + leftBorder + ", " + topBorder + ")");
+                const timeScale = d3.scaleTime()
+                    .domain([minT, maxT])
+                    .range([0, width - leftBorder - rightBorder]);
+                xaxis.attr("class", "xaxis")
+                    .attr("transform", "translate(" + leftBorder + ", " + (height - botBorder) + ")")
+                    .call(d3.axisBottom(timeScale)
+                    .tickPadding(10));
+                const qq = canvas.selectAll(".xaxis text");
+                qq.attr("transform", function (d) {
+                    return "translate(" + this.getBBox().height * -2 + "," + this.getBBox().height + ")rotate(-45)";
+                });
+                grid.attr("class", "grid")
+                    .attr("transform", "translate(" + leftBorder + ", " + (height - topBorder - botBorder) + ")")
+                    .attr("opacity", "0.1")
+                    .call(d3.axisBottom(timeScale)
+                    .tickSize(-(height - topBorder - botBorder)));
+                const barHeight = (height - botBorder) / 4;
+                /*
+                const cdiv = div._div();
+                cdiv.style.position = "absolute"
+                const ctxt = cdiv._text("");
+                canvas.on("mousemove touchmove", () => {
+                    const p = d3.mouse(svg);
+                    cdiv.style.left = p[0] + "";
+                    cdiv.style.top = p[1] + "";
+                    ctxt.textContent = formatTime(new Date(timeScale.invert(p[0] - leftBorder)), false);
+                });
+                */
+                feeds
+                    .style("fill", "steelblue")
+                    .attr("x", p => leftBorder + timeScale(p.t0))
+                    .attr("width", p => 1 + timeScale(p.t1 || new Date().getTime()) - timeScale(p.t0))
+                    .attr("y", d => topBorder + barHeight)
+                    .attr("height", d => barHeight);
+                sleeps
+                    .style("fill", "red")
+                    .attr("x", p => leftBorder + timeScale(p.t0))
+                    .attr("width", p => 1 + timeScale((p.t1 || new Date().getTime())) - timeScale(p.t0))
+                    .attr("y", d => topBorder + 3 * barHeight)
+                    .attr("height", d => barHeight);
+            }
+            const div = parent._div();
+            div.style.position = "relative";
+            const svg = div._svg();
+            let init = 0;
+            let zooming = false;
+            let oldoffset = offset;
+            let oldscale = reso.getTime();
+            svg.addEventListener("touchstart", (e) => {
+                const te = e;
+                te.preventDefault();
+                if (te.touches.length === 1) {
+                    zooming = false;
+                    init = te.targetTouches[0].clientX;
+                }
+                else {
+                    init = Math.abs(te.touches[0].clientX - te.touches[1].clientX);
+                    zooming = true;
+                }
             });
-            canvas.append("g")
-                .attr("class", "grid")
-                .attr("transform", "translate(" + leftBorder + ", " + (height - topBorder - botBorder) + ")")
-                .attr("opacity", "0.1")
-                .call(d3.axisBottom(timeScale)
-                .tickSize(-(height - topBorder - botBorder)));
-            const barHeight = (height - botBorder) / 4;
-            canvas.selectAll("foo").data(model.feed).enter().append("rect")
-                .style("fill", "steelblue")
-                .attr("x", p => leftBorder + timeScale(p.t0))
-                .attr("width", p => 1 + timeScale(p.t1 || new Date().getTime()) - timeScale(p.t0))
-                .attr("y", d => topBorder + barHeight)
-                .attr("height", d => barHeight);
-            canvas.selectAll("bar").data(model.sleep).enter().append("rect")
-                .style("fill", "red")
-                .attr("x", p => leftBorder + timeScale(p.t0))
-                .attr("width", p => 1 + timeScale((p.t1 || new Date().getTime())) - timeScale(p.t0))
-                .attr("y", d => topBorder + 3 * barHeight)
-                .attr("height", d => barHeight);
-            const inputReso = parent._inputTime(reso, () => {
-                // drawSite(parent, model, reso);
-            }, true);
-            inputReso.style.width = "25%";
-            inputReso.min = "1";
+            svg.addEventListener('touchmove', (e) => {
+                const te = e;
+                te.preventDefault();
+                if (te.touches.length === 1 && !zooming) {
+                    const p = te.targetTouches[0];
+                    var difx = init - p.clientX;
+                    offset = oldoffset + difx * (oldscale / 500);
+                }
+                else if (te.touches.length === 2 && zooming) {
+                    const difx = (init - Math.abs(te.touches[0].clientX - te.touches[1].clientX));
+                    offset = oldoffset + difx * (oldscale / 400);
+                    reso.setTime(oldscale + difx * (oldscale / 200));
+                }
+                window.requestAnimationFrame(() => {
+                    drawGanttPlot(svg);
+                });
+            });
+            svg.addEventListener("touchend", () => {
+                oldoffset = offset;
+                oldscale = reso.getTime();
+            });
+            const canvas = d3.select(svg);
+            canvas.html("");
+            const plot = canvas.append("g");
+            const xaxis = canvas.append("g");
+            const grid = canvas.append("g");
+            const feeds = canvas.selectAll("foo").data(model.feed).enter().append("rect");
+            const sleeps = canvas.selectAll("bar").data(model.sleep).enter().append("rect");
+            drawGanttPlot(svg);
         }
         function timeContainer(div, open, width4) {
             const timeContainer = div._span();
@@ -105,7 +161,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                 const time = timeContainer(div, true, width4)._text(dom_1.formatTime(new Date(new Date().getTime() - series[series.length - 1].t0), true));
                 tickFuns[key] = () => {
                     time.textContent = dom_1.formatTime(new Date(new Date().getTime() - series[series.length - 1].t0), true);
-                    drawSite(parent, model, reso);
+                    // drawSite(parent, model, reso);
                 };
             }
             else {
@@ -119,8 +175,10 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                     const t = series[series.length - 1].t1;
                     if (t == null)
                         throw "";
-                    const time = timeContainer(div, false, width4)._text(dom_1.formatTime(new Date(t + nextTime * 3600 * 1000), false));
-                    tickFuns[key] = () => { };
+                    const time = timeContainer(div, false, width4)._text(dom_1.formatTime(new Date(new Date().getTime() - t), true));
+                    tickFuns[key] = () => {
+                        time.textContent = dom_1.formatTime(new Date(new Date().getTime() - t), true);
+                    };
                 }
                 else {
                     const time = timeContainer(div, false, width4)._text("");
@@ -134,6 +192,30 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             });
             regret.hidden = !open;
             regret.style.width = width4;
+            if (series.length > 0 && !open) {
+                const t = series[series.length - 1].t1;
+                if (t) {
+                    const cont = timeContainer(div, false, width4);
+                    const d = new Date(t + nextTime * 3600 * 1000);
+                    const ttt = cont._text(dom_1.formatTime(d, false));
+                    cont.style.background = (key === "sleep") === (new Date().getTime() > d.getTime()) ? "pink" : "lightgreen";
+                    tickFuns[key + "Next"] = () => {
+                        cont.style.background = (key === "sleep") === (new Date().getTime() > d.getTime()) ? "pink" : "lightgreen";
+                    };
+                }
+                else {
+                    const cont = timeContainer(div, false, width4);
+                    cont.hidden = true;
+                    cont._text("");
+                    tickFuns[key + "Next"] = () => { };
+                }
+            }
+            else {
+                const cont = timeContainer(div, false, width4);
+                cont.hidden = true;
+                cont._text("");
+                tickFuns[key + "Next"] = () => { };
+            }
         }
         parent._draw(() => {
             makeControl("sleep");
