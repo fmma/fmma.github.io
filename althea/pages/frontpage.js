@@ -297,8 +297,10 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             tickFuns.anim = () => {
                 twerp += 0.01;
                 img.style.marginLeft = ((window.innerWidth - 200) * (0.5 + Math.cos(twerp) / 2)) + "px";
-                img.style.width = (90 + 90 * (0.5 + Math.cos(10 * twerp) / 2)) + "px";
+                /*
+                img.style.width = (90 + 90 * (0.5 + Math.cos(10*twerp)/2)) + "px";
                 img.style.height = "auto";
+                */
             };
         });
     }
