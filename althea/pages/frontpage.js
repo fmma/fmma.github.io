@@ -16,16 +16,18 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             drawSite(div, model, new Date(12 * 3600 * 1000) /*12 hours*/, 0);
             let mayorTick = 0;
             setInterval(() => {
-                mayorTick++;
-                if (mayorTick === 10) {
-                    mayorTick = 0;
-                    tickFuns.reloadModel();
+                if (!document.hidden) {
+                    mayorTick++;
+                    if (mayorTick === 10) {
+                        mayorTick = 0;
+                        tickFuns.reloadModel();
+                    }
+                    tickFuns.sleepTotal();
+                    tickFuns.sleep();
+                    tickFuns.feed();
+                    tickFuns.sleepNext();
+                    tickFuns.feedNext();
                 }
-                tickFuns.sleepTotal();
-                tickFuns.sleep();
-                tickFuns.feed();
-                tickFuns.sleepNext();
-                tickFuns.feedNext();
             }, 1000);
             let lastTick = new Date().getTime();
             document.addEventListener("visibilitychange", function () {
