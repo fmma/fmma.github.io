@@ -122,7 +122,7 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
                         model.feed.forEach(p => {
                             p.h = Boolean(Math.round(Math.random()));
                             p.v = Boolean(Math.round(Math.random()));
-                        }) */
+                        })*/
                         resolve(model);
                     }
                     else {

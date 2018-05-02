@@ -173,11 +173,26 @@ define(["require", "exports"], function (require, exports) {
         const month = ("0" + (date.getMonth() + 1)).slice(-2);
         return date.getFullYear() + "-" + month + "-" + day;
     }
-    function formatTime(date, utc) {
-        const hour = ("0" + (!utc ? date.getHours() : date.getUTCHours())).slice(-2);
-        const minute = ("0" + (!utc ? date.getMinutes() : date.getUTCMinutes())).slice(-2);
-        const sec = ("0" + (!utc ? date.getSeconds() : date.getUTCSeconds())).slice(-2);
-        return hour + ":" + minute + ":" + sec;
+    function formatTime(date, utc, seconds = true) {
+        if (utc) {
+            let secs = Math.floor(date.getTime() / 1000);
+            let mins = Math.floor(secs / 60);
+            let hours = Math.floor(mins / 60);
+            const days = Math.floor(hours / 24);
+            secs = secs % 60;
+            mins = mins % 60;
+            hours = hours % 24;
+            let res = days > 0 ? days + "d" : "";
+            res += res || hours > 0 ? hours + "h" : "";
+            res += res || mins > 0 ? mins + "m" : "";
+            res += seconds && (res || secs > 0) ? secs + "s" : "";
+            return res;
+        }
+        const days = Math.floor(date.getTime() / (24 * 60 * 60 * 1000));
+        const hour = ("0" + date.getHours()).slice(-2);
+        const minute = ("0" + date.getMinutes()).slice(-2);
+        const sec = ("0" + date.getSeconds()).slice(-2);
+        return hour + ":" + minute + (seconds ? ":" + sec : "");
     }
     exports.formatTime = formatTime;
     Node.prototype._inputDate = function (value, onchange = () => { }) {
@@ -198,7 +213,7 @@ define(["require", "exports"], function (require, exports) {
         const input = this.provideNode(() => document.createElement("input"));
         input.type = "time";
         input.step = "2";
-        input.value = formatTime(value, utc);
+        input.value = formatTime(value, utc, true);
         input.onchange = () => {
             if (input.valueAsDate) {
                 value.setUTCMinutes(input.valueAsDate.getUTCMinutes());

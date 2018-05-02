@@ -23,6 +23,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             }, 1000);
             const animFix = () => window.requestAnimationFrame(() => {
                 tickFuns.anim();
+                tickFuns.drawGanttPlot();
                 animFix();
             });
             animFix();
@@ -35,7 +36,8 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
         feed: () => { },
         sleepNext: () => { },
         feedNext: () => { },
-        anim: () => { }
+        anim: () => { },
+        drawGanttPlot: () => { }
     };
     let offset = 0;
     function drawSite(parent, model, reso, avgMode) {
@@ -46,7 +48,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                 const topBorder = 0;
                 const botBorder = 50;
                 const width = window.innerWidth - leftBorder - rightBorder;
-                const height = width / 5 + topBorder + botBorder;
+                const height = Math.min(width / 3, 400) + topBorder + botBorder;
                 const today = new Date().getTime();
                 const minT = offset + today - reso.getTime(); // Math.min(Math.min(... model.sleep.map(p => p.t0)), Math.min(... model.feed.map(p => p.t0))) - 10000;
                 const maxT = offset + today;
@@ -70,74 +72,76 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                     .call(d3.axisBottom(timeScale)
                     .tickSize(-(height - topBorder - botBorder)));
                 const barHeight = (height - botBorder) / 4;
-                /*
-                const cdiv = div._div();
-                cdiv.style.position = "absolute"
-                const ctxt = cdiv._text("");
-                canvas.on("mousemove touchmove", () => {
-                    const p = d3.mouse(svg);
-                    cdiv.style.left = p[0] + "";
-                    cdiv.style.top = p[1] + "";
-                    ctxt.textContent = formatTime(new Date(timeScale.invert(p[0] - leftBorder)), false);
-                });
-                */
-                /*
-                feeds
-                    .style("fill", "steelblue")
-                    .attr("x", p => leftBorder + timeScale(p.t0))
-                    .attr("width", p => 1 + timeScale(p.t1 || new Date().getTime()) - timeScale(p.t0))
-                    .attr("y", d => topBorder + barHeight)
-                    .attr("height", d => barHeight);
-                */
-                const line = d3.line();
+                const line = d3.line()
+                    .x(([x, y]) => leftBorder + timeScale(x))
+                    .y(([x, y]) => topBorder + y * barHeight);
                 feedsHV
-                    .attr("d", p => line(p.h && p.v
-                    ? [[leftBorder + timeScale(p.t0) + 1, topBorder + barHeight],
-                        [leftBorder + timeScale(p.t0) + 1 - barHeight / 5, topBorder + 1.5 * barHeight],
-                        [leftBorder + timeScale(p.t0) + 1, topBorder + 2 * barHeight],
-                        [leftBorder + timeScale(p.t1 || new Date().getTime()), topBorder + 2 * barHeight],
-                        [leftBorder + timeScale(p.t1 || new Date().getTime()) + barHeight / 5, topBorder + 1.5 * barHeight],
-                        [leftBorder + timeScale(p.t1 || new Date().getTime()), topBorder + barHeight]
-                    ]
-                    : p.v
-                        ? [[leftBorder + timeScale(p.t0) + 1, topBorder + barHeight],
-                            [leftBorder + timeScale(p.t0) + 1 - barHeight / 5, topBorder + 1.5 * barHeight],
-                            [leftBorder + timeScale(p.t0) + 1, topBorder + 2 * barHeight],
-                            [leftBorder + timeScale(p.t1 || new Date().getTime()), topBorder + 2 * barHeight],
-                            [leftBorder + timeScale(p.t1 || new Date().getTime()), topBorder + 1.5 * barHeight],
-                            [leftBorder + timeScale(p.t1 || new Date().getTime()), topBorder + barHeight]
-                        ]
-                        : p.h
-                            ? [[leftBorder + timeScale(p.t0) + 1, topBorder + barHeight],
-                                [leftBorder + timeScale(p.t0) + 1, topBorder + 1.5 * barHeight],
-                                [leftBorder + timeScale(p.t0) + 1, topBorder + 2 * barHeight],
-                                [leftBorder + timeScale(p.t1 || new Date().getTime()), topBorder + 2 * barHeight],
-                                [leftBorder + timeScale(p.t1 || new Date().getTime()) + barHeight / 5, topBorder + 1.5 * barHeight],
-                                [leftBorder + timeScale(p.t1 || new Date().getTime()), topBorder + barHeight]
-                            ]
-                            : [[leftBorder + timeScale(p.t0) + 1, topBorder + barHeight],
-                                [leftBorder + timeScale(p.t0) + 1, topBorder + 1.5 * barHeight],
-                                [leftBorder + timeScale(p.t0) + 1, topBorder + 2 * barHeight],
-                                [leftBorder + timeScale(p.t1 || new Date().getTime()), topBorder + 2 * barHeight],
-                                [leftBorder + timeScale(p.t1 || new Date().getTime()), topBorder + 1.5 * barHeight],
-                                [leftBorder + timeScale(p.t1 || new Date().getTime()), topBorder + barHeight]
-                            ]))
+                    .attr("d", p => line([[p.t0, 1],
+                    [p.t0 - (p.v ? 400000 : 0), 1.5],
+                    [p.t0, 2],
+                    [p.t1 || today, 2],
+                    [(p.t1 || today) + (p.h ? 400000 : 0), 1.5],
+                    [p.t1 || today, 1]
+                ]))
                     .attr("stroke", "steelblue")
-                    .attr("fill", "steelblue");
+                    .attr("fill", "steelblue")
+                    .on("mousedown touchstart", (p, i, rs) => {
+                    showInfobox = true;
+                    const len = dom_1.formatTime(new Date((p.t1 || today) - p.t0), true, false);
+                    const sta = dom_1.formatTime(new Date(p.t0), false, false);
+                    const end = dom_1.formatTime(new Date((p.t1 || today)), false, false);
+                    infoboxtext.text(sta + " - " + end + " (" + len + ")");
+                    infobox.attr("visibility", "visible");
+                });
                 sleeps
                     .style("fill", "red")
                     .attr("x", p => leftBorder + timeScale(p.t0))
                     .attr("width", p => 1 + timeScale((p.t1 || new Date().getTime())) - timeScale(p.t0))
                     .attr("y", d => topBorder + 3 * barHeight)
-                    .attr("height", d => barHeight);
+                    .attr("height", d => barHeight)
+                    .on("mousedown touchstart", (p, i, rs) => {
+                    showInfobox = true;
+                    const len = dom_1.formatTime(new Date((p.t1 || today) - p.t0), true, false);
+                    const sta = dom_1.formatTime(new Date(p.t0), false, false);
+                    const end = dom_1.formatTime(new Date((p.t1 || today)), false, false);
+                    infoboxtext.text(sta + " - " + end + " (" + len + ")");
+                    infobox.attr("visibility", "visible");
+                });
             }
             const div = parent._div();
             div.style.position = "relative";
             const svg = div._svg();
             let init = 0;
+            let initY = 0;
             let zooming = false;
             let oldoffset = offset;
             let oldscale = reso.getTime();
+            svg.addEventListener("mousedown", (e) => {
+                const me = e;
+                me.preventDefault();
+                init = me.clientX;
+                initY = me.clientY;
+                zooming = true;
+            });
+            svg.addEventListener("mousemove", (e) => {
+                const me = e;
+                me.preventDefault();
+                if (!zooming)
+                    return;
+                const difx = init - me.clientX;
+                const dify = (initY - me.clientY);
+                offset = oldoffset + difx * (oldscale / window.innerWidth) + dify * (oldscale / window.innerWidth);
+                // offset = oldoffset + difx * (oldscale / 400)
+                reso.setTime(oldscale + dify * (oldscale / 200));
+                window.requestAnimationFrame(() => {
+                    drawGanttPlot(svg);
+                });
+            });
+            svg.addEventListener("mouseup", () => {
+                oldoffset = offset;
+                oldscale = reso.getTime();
+                zooming = false;
+            });
             svg.addEventListener("touchstart", (e) => {
                 const te = e;
                 te.preventDefault();
@@ -156,7 +160,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                 if (te.touches.length === 1 && !zooming) {
                     const p = te.targetTouches[0];
                     var difx = init - p.clientX;
-                    offset = oldoffset + difx * (oldscale / 500);
+                    offset = oldoffset + difx * (oldscale / window.innerWidth);
                 }
                 else if (te.touches.length === 2 && zooming) {
                     const difx = (init - Math.abs(te.touches[0].clientX - te.touches[1].clientX));
@@ -172,14 +176,38 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                 oldscale = reso.getTime();
             });
             const canvas = d3.select(svg);
+            let showInfobox = false;
             canvas.html("");
+            canvas
+                .on("mousedown touchstart", () => {
+                if (!showInfobox)
+                    infobox.attr("visibility", "hidden");
+                showInfobox = false;
+            });
             const plot = canvas.append("g");
             const xaxis = canvas.append("g");
             const grid = canvas.append("g");
-            const feeds = canvas.selectAll("foo").data(model.feed).enter().append("rect");
             const feedsHV = canvas.selectAll("foobar").data(model.feed).enter().append("path");
             const sleeps = canvas.selectAll("bar").data(model.sleep).enter().append("rect");
+            const infobox = canvas.append("g")
+                .attr("transform", "translate(" + 0 + ", " + 0 + ")")
+                .attr("visibility", "hidden");
+            const infoboxrect = infobox.append("rect")
+                .attr("fill", "white")
+                .attr("width", "200pt")
+                .attr("height", "32pt")
+                .attr('stroke', 'black')
+                .attr('stroke-dasharray', '10,5')
+                .attr('stroke-linecap', 'butt')
+                .attr('stroke-width', '3');
+            const infoboxtext = infobox.append("text")
+                .attr("x", "100pt")
+                .attr("y", "16pt")
+                .attr("text-anchor", "middle")
+                .attr("dominant-baseline", "central")
+                .text("22:33:22");
             drawGanttPlot(svg);
+            tickFuns.drawGanttPlot = () => drawGanttPlot(svg);
         }
         function timeContainer(div, open, width4) {
             const timeContainer = div._span();
@@ -200,11 +228,6 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             if (open) {
                 const button = div._button("Slut", () => {
                     series[series.length - 1].t1 = new Date().getTime();
-                    if (key === "feed") {
-                        series[series.length - 1].h = bh;
-                        series[series.length - 1].v = bv;
-                        console.log(series[series.length - 1]);
-                    }
                     model_1.saveModel(model);
                     drawSite(parent, model, reso, avgMode);
                 });
@@ -267,20 +290,18 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                 cont._text("");
                 tickFuns[key + "Next"] = () => { };
             }
-            let bh = false;
-            let bv = false;
             if (key == "feed") {
-                if (series.length > 0) {
-                    bh = series[series.length - 1].h || false;
-                    bv = series[series.length - 1].v || false;
-                }
                 timeContainer(parent, true, "25%");
                 const hv = timeContainer(parent, false, "25%");
                 const disabled = !(model.feed.length > 0 && model.feed[model.feed.length - 1].t1 == null);
                 hv._text("V");
-                hv._checkbox(bv, b => { bv = b; }).disabled = disabled;
+                hv._checkbox(series[series.length - 1] && series[series.length - 1].v || false, b => {
+                    series[series.length - 1].v = b;
+                }).disabled = disabled;
                 hv._text("H");
-                hv._checkbox(bh, b => { bh = b; }).disabled = disabled;
+                hv._checkbox(series[series.length - 1] && series[series.length - 1].h || false, b => {
+                    series[series.length - 1].h = b;
+                }).disabled = disabled;
             }
         }
         parent._draw(() => {
@@ -300,15 +321,11 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                 const w = { t0: avgMode == 0 ? today - 24 * 3600 * 1000 : avgMode == 1 ? today - 7 * 24 * 3600 * 1000 : 0, t1: today };
                 sleepTotal.textContent = "Total søvn: " + dom_1.formatTime(new Date(model_1.total(model_1.sliceWindow(model.sleep, w, true))), true);
             };
-            parent._paragraph("Gennemsnit vågen: " + dom_1.formatTime(new Date(model_1.average(model_1.invert(model_1.sliceWindow(model.sleep, w, false)))), true));
+            parent._paragraph("Gennemsnit vågen: " + dom_1.formatTime(new Date(model_1.average(model_1.sliceWindow(model_1.invert(model.sleep), w, false))), true));
             const img = parent._div()._img("resources/apple-icon-180x180.png");
             tickFuns.anim = () => {
                 twerp += 0.01;
                 img.style.marginLeft = ((window.innerWidth - 200) * (0.5 + Math.cos(twerp) / 2)) + "px";
-                /*
-                img.style.width = (90 + 90 * (0.5 + Math.cos(10*twerp)/2)) + "px";
-                img.style.height = "auto";
-                */
             };
         });
     }
