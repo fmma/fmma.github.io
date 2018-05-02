@@ -14,18 +14,37 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             const div = parent._div();
             const model = yield model_1.loadModel();
             drawSite(div, model, new Date(12 * 3600 * 1000) /*12 hours*/, 0);
+            let mayorTick = 0;
             setInterval(() => {
+                mayorTick++;
+                if (mayorTick === 10) {
+                    mayorTick = 0;
+                    tickFuns.reloadModel();
+                }
                 tickFuns.sleepTotal();
                 tickFuns.sleep();
                 tickFuns.feed();
                 tickFuns.sleepNext();
                 tickFuns.feedNext();
             }, 1000);
-            const animFix = () => window.requestAnimationFrame(() => {
+            let lastTick = new Date().getTime();
+            document.addEventListener("visibilitychange", function () {
+                if (!document.hidden) {
+                    const t = new Date().getTime();
+                    if (t - lastTick > 10000) {
+                        lastTick = t;
+                        tickFuns.reloadModel();
+                    }
+                }
+            });
+            const f = () => {
                 tickFuns.anim();
                 // tickFuns.drawGanttPlot(); TODO heavy
                 animFix();
-            });
+            };
+            const animFix = () => {
+                window.requestAnimationFrame(f);
+            };
             animFix();
         });
     }
@@ -37,10 +56,15 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
         sleepNext: () => { },
         feedNext: () => { },
         anim: () => { },
-        drawGanttPlot: () => { }
+        drawGanttPlot: () => { },
+        reloadModel: () => { }
     };
     let offset = 0;
     function drawSite(parent, model, reso, avgMode) {
+        tickFuns.reloadModel = () => __awaiter(this, void 0, void 0, function* () {
+            const newModel = yield model_1.loadModel();
+            drawSite(parent, newModel, reso, avgMode);
+        });
         function makeGantt() {
             function drawGanttPlot(svg) {
                 const leftBorder = 50;
