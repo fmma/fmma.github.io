@@ -23,7 +23,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             }, 1000);
             const animFix = () => window.requestAnimationFrame(() => {
                 tickFuns.anim();
-                tickFuns.drawGanttPlot();
+                // tickFuns.drawGanttPlot(); TODO heavy
                 animFix();
             });
             animFix();
