@@ -94,8 +94,8 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
     }
     exports.saveModel = saveModel;
     var seriesCache = {};
-    function loadModel() {
-        if (seriesCache[userID])
+    function loadModel(force) {
+        if (!force && seriesCache[userID])
             return Promise.resolve(seriesCache[userID]);
         return new Promise((resolve, reject) => {
             const docClient = new aws.DynamoDB.DocumentClient({
@@ -123,6 +123,8 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
                             p.h = Boolean(Math.round(Math.random()));
                             p.v = Boolean(Math.round(Math.random()));
                         })*/
+                        model.dirty = false;
+                        seriesCache[userID] = model;
                         resolve(model);
                     }
                     else {

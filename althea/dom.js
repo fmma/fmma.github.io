@@ -198,7 +198,7 @@ define(["require", "exports"], function (require, exports) {
     Node.prototype._inputDate = function (value, onchange = () => { }) {
         const input = this.provideNode(() => document.createElement("input"));
         input.type = "date";
-        input.value = formatDate(value);
+        input.value = value.getTime() === 0 ? "" : formatDate(value);
         input.onchange = () => {
             if (input.valueAsDate) {
                 value.setMonth(input.valueAsDate.getMonth());
@@ -212,17 +212,39 @@ define(["require", "exports"], function (require, exports) {
     Node.prototype._inputTime = function (value, onchange = () => { }, utc = false) {
         const input = this.provideNode(() => document.createElement("input"));
         input.type = "time";
-        input.step = "2";
-        input.value = formatTime(value, utc, true);
+        input.value = value.getTime() === 0 ? "" : formatTime(value, utc, false);
         input.onchange = () => {
             if (input.valueAsDate) {
-                value.setUTCMinutes(input.valueAsDate.getUTCMinutes());
-                value.setUTCHours(input.valueAsDate.getUTCHours());
-                value.setUTCSeconds(input.valueAsDate.getUTCSeconds());
+                if (utc) {
+                    value.setUTCMinutes(input.valueAsDate.getUTCMinutes());
+                    value.setUTCHours(input.valueAsDate.getUTCHours());
+                }
+                else {
+                    value.setMinutes(input.valueAsDate.getUTCMinutes());
+                    value.setHours(input.valueAsDate.getUTCHours());
+                }
                 onchange();
             }
         };
         return input;
+    };
+    Node.prototype._inputDateTime = function (value, onchange = () => { }) {
+        const span = this._span();
+        const onchangeCommon = () => {
+            if (dateInput.valueAsDate && timeInput.valueAsDate) {
+                value.setMonth(dateInput.valueAsDate.getMonth());
+                value.setDate(dateInput.valueAsDate.getDate());
+                value.setFullYear(dateInput.valueAsDate.getFullYear());
+                value.setMinutes(timeInput.valueAsDate.getUTCMinutes());
+                value.setHours(timeInput.valueAsDate.getUTCHours());
+                onchange();
+            }
+        };
+        const dateInput = span._inputDate(value);
+        const timeInput = span._inputTime(value);
+        dateInput.onchange = onchangeCommon;
+        timeInput.onchange = onchangeCommon;
+        return span;
     };
     Node.prototype._inputNumber = function (placeholder, value, onchange = () => { }) {
         const input = this.provideNode(() => document.createElement("input"));
@@ -299,6 +321,10 @@ define(["require", "exports"], function (require, exports) {
                 document.body.innerHTML = msg + err;
             };
     }
+    window.onhashchange = () => {
+        const x = window.location.hash.substr(1);
+        new Promise((resolve_1, reject_1) => { require(["./" + x], resolve_1, reject_1); }).then(makeSite);
+    };
     function makeSite(r) {
         if (r) {
             if (document.body) {

@@ -9,13 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 define(["require", "exports", "../model", "../dom", "d3"], function (require, exports, model_1, dom_1, d3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    let iv;
     function makeSite(parent) {
         return __awaiter(this, void 0, void 0, function* () {
             const div = parent._div();
-            const model = yield model_1.loadModel();
+            const model = yield model_1.loadModel(false);
             drawSite(div, model, new Date(12 * 3600 * 1000) /*12 hours*/, 0);
             let mayorTick = 0;
-            setInterval(() => {
+            iv = setInterval(() => {
                 if (!document.hidden) {
                     mayorTick++;
                     if (mayorTick === 10) {
@@ -64,7 +65,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
     let offset = 0;
     function drawSite(parent, model, reso, avgMode) {
         tickFuns.reloadModel = () => __awaiter(this, void 0, void 0, function* () {
-            const newModel = yield model_1.loadModel();
+            const newModel = yield model_1.loadModel(true);
             drawSite(parent, newModel, reso, avgMode);
         });
         function makeGantt() {
@@ -330,10 +331,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                 }).disabled = disabled;
             }
         }
-        parent._draw(() => {
-            makeControl("sleep");
-            makeControl("feed");
-            makeGantt();
+        function makeStatistics() {
             const sel = parent._select(["24 timer", "en uge", "for altid"], avgMode, i => {
                 drawSite(parent, model, reso, i);
             });
@@ -353,6 +351,13 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                 twerp += 0.01;
                 img.style.marginLeft = ((window.innerWidth - 200) * (0.5 + Math.cos(twerp) / 2)) + "px";
             };
+        }
+        parent._draw(() => {
+            parent._link("Manu ret", "#pages/manu").onclick = () => clearInterval(iv);
+            makeControl("sleep");
+            makeControl("feed");
+            makeGantt();
+            makeStatistics();
         });
     }
     let twerp = 0.0;
