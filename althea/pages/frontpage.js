@@ -253,11 +253,13 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             const div = parent._div();
             timeContainer(div, false, width4)._text(displayName + ": ");
             if (open) {
-                const button = div._button("Slut", () => {
+                const button = div._button("Slut", () => __awaiter(this, void 0, void 0, function* () {
                     series[series.length - 1].t1 = new Date().getTime();
-                    model_1.saveModel(model);
+                    button.disabled = true;
+                    yield model_1.saveModel(model);
+                    button.disabled = false;
                     drawSite(parent, model, reso, avgMode);
-                });
+                }));
                 button.style.width = width4;
                 const time = timeContainer(div, true, width4)._text(dom_1.formatTime(new Date(new Date().getTime() - series[series.length - 1].t0), true));
                 tickFuns[key] = () => {
@@ -266,11 +268,13 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                 };
             }
             else {
-                const button = div._button("Start", () => {
+                const button = div._button("Start", () => __awaiter(this, void 0, void 0, function* () {
                     model[key].push({ t0: new Date().getTime() });
-                    model_1.saveModel(model);
+                    button.disabled = true;
+                    yield model_1.saveModel(model);
+                    button.disabled = false;
                     drawSite(parent, model, reso, avgMode);
-                });
+                }));
                 button.style.width = width4;
                 if (series.length > 0) {
                     const t = series[series.length - 1].t1;
@@ -286,11 +290,13 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                     tickFuns[key] = () => { };
                 }
             }
-            const regret = div._button("Fortryd", () => {
+            const regret = div._button("Fortryd", () => __awaiter(this, void 0, void 0, function* () {
                 series.pop();
-                model_1.saveModel(model);
+                regret.disabled = true;
+                yield model_1.saveModel(model);
+                regret.disabled = false;
                 drawSite(parent, model, reso, avgMode);
-            });
+            }));
             regret.hidden = !open;
             regret.style.width = width4;
             if (series.length > 0 && !open) {
