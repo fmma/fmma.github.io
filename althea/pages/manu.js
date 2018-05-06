@@ -11,75 +11,109 @@ define(["require", "exports", "../model"], function (require, exports, model_1) 
     Object.defineProperty(exports, "__esModule", { value: true });
     function makeSite(parent) {
         return __awaiter(this, void 0, void 0, function* () {
-            const div = parent._div();
-            div._link("Forside", "#pages/frontpage");
-            const model = yield model_1.loadModel(false);
-            const date = new Date();
-            const rowProvider = (series, hv, tableNum) => () => ({
-                ith: (i, row) => {
-                    date.setTime(series[i].t0);
-                    row._td()._inputDateTime(date, () => {
-                        model.dirty = true;
-                        series[i].t0 = date.getTime();
-                    });
-                    date.setTime(series[i].t1 || 0);
-                    row._td()._inputDateTime(date, () => {
-                        model.dirty = true;
-                        series[i].t1 = date.getTime();
-                    });
-                    if (hv) {
-                        row._td()._checkbox(series[i].h || false, b => {
-                            model.dirty = true;
-                            series[i].h = b;
-                        });
-                        row._td()._checkbox(series[i].v || false, b => {
-                            model.dirty = true;
-                            series[i].v = b;
-                        });
-                    }
-                    if (tableNum > 0) {
-                        row._td()._button("Slet", () => {
-                            series.splice(i, 1);
-                            if (tableNum == 1)
-                                table1.redraw();
-                            else
-                                table2.redraw();
-                        });
-                    }
-                },
-                n: series.length
-            });
-            div._button("Gem det hele", () => {
-                model_1.saveModel(model);
-            });
-            div._button("Sorter", () => {
-                model.sleep.sort((a, b) => a.t0 - b.t0);
-                model.feed.sort((a, b) => a.t0 - b.t0);
-                table1.redraw();
-                table2.redraw();
-            });
-            const createModel = { sleep: [{ t0: 0 }], feed: [{ t0: 0 }], dirty: true };
-            div._paragraph("Amning").style.fontWeight = "bold";
-            const createRow1 = div._table("Start", "Slut", "Højre", "Venstre")._tr();
-            rowProvider(createModel.feed, true, 0)().ith(0, createRow1);
-            createRow1._td()._button("Opret", () => {
-                model.feed.push(createModel.feed[0]);
-                model.feed.sort((a, b) => a.t0 - b.t0);
-                table1.redraw();
-            });
-            const table1 = div._pagedTable(["Start", "Slut", "Højre", "Venstre"], 10, rowProvider(model.feed, true, 1));
-            div._paragraph("Søvn").style.fontWeight = "bold";
-            const createRow2 = div._table("Start", "Slut")._tr();
-            rowProvider(createModel.sleep, false, 0)().ith(0, createRow2);
-            createRow2._td()._button("Opret", () => {
-                model.sleep.push(createModel.sleep[0]);
-                model.sleep.sort((a, b) => a.t0 - b.t0);
-                table2.redraw();
-            });
-            const table2 = div._pagedTable(["Start", "Slut"], 10, rowProvider(model.sleep, false, 1));
-            table1.redraw();
-            table2.redraw();
+            new Manu(parent._div(), yield model_1.loadModel(false));
         });
     }
     exports.makeSite = makeSite;
+    class Manu {
+        constructor(div, model) {
+            if (div == null)
+                throw new Error("Null div");
+            if (model == null)
+                throw new Error("Null model");
+            this.div = div;
+            this.model = model;
+            this.makeSite();
+        }
+        makeSite() {
+            this.makeMenu();
+            this.makeControlButtons();
+            this.makeFeedTable();
+            this.makeSleepTable();
+        }
+        makeMenu() {
+            this.div._div()._link("Forside", "#pages/frontpage");
+        }
+        makeControlButtons() {
+            const buttonsDiv = this.div._div();
+            buttonsDiv._button("Gem det hele", () => {
+                model_1.saveModel(this.model);
+            });
+            buttonsDiv._button("Sorter", () => {
+                this.model.sleep.sort((a, b) => a.t0 - b.t0);
+                this.model.feed.sort((a, b) => a.t0 - b.t0);
+                this.feedTable.redraw();
+                this.sleepTable.redraw();
+            });
+        }
+        makeFeedTable() {
+            this.div._paragraph("Amning").style.fontWeight = "bold";
+            const columns = ["Start", "Slut", "Højre", "Venstre"];
+            this.makeCreateRow(columns, this.model.feed, this.feedTable, true);
+            const rowProvider = this.createRowProvider(this.model.feed, true, 1);
+            this.feedTable = this.div._pagedTable(columns, 10, rowProvider);
+            this.feedTable.redraw();
+        }
+        makeCreateRow(columns, series, table, hv) {
+            const createPeriod = { t0: 0 };
+            const createRow = this.div._table(...columns)._tr();
+            this.createRowProvider([createPeriod], hv, 0)().ith(0, createRow);
+            createRow._td()._button("Opret", () => {
+                series.push(Object.assign({}, createPeriod));
+                series.sort((a, b) => a.t0 - b.t0);
+                table.redraw();
+            });
+        }
+        makeSleepTable() {
+            this.div._paragraph("Søvn").style.fontWeight = "bold";
+            const columns = ["Start", "Slut"];
+            this.makeCreateRow(columns, this.model.sleep, this.sleepTable, false);
+            const rowProvider = this.createRowProvider(this.model.sleep, false, 1);
+            this.sleepTable = this.div._pagedTable(columns, 10, rowProvider);
+            this.sleepTable.redraw();
+        }
+        createRowProvider(series, hv, tableNum) {
+            const rp = new ManuRowProvider(this, series, hv, tableNum);
+            return () => rp;
+        }
+    }
+    class ManuRowProvider {
+        constructor(manu, series, hv, tableNum) {
+            this.date = new Date();
+            this.manu = manu;
+            this.series = series;
+            this.hv = hv;
+            this.tableNum = tableNum;
+        }
+        get n() {
+            return this.series.length;
+        }
+        ith(i, row) {
+            this.date.setTime(this.series[i].t0);
+            row._td()._inputDateTime(this.date, () => {
+                this.series[i].t0 = this.date.getTime();
+            });
+            this.date.setTime(this.series[i].t1 || 0);
+            row._td()._inputDateTime(this.date, () => {
+                this.series[i].t1 = this.date.getTime();
+            });
+            if (this.hv) {
+                row._td()._checkbox(this.series[i].h || false, b => {
+                    this.series[i].h = b;
+                });
+                row._td()._checkbox(this.series[i].v || false, b => {
+                    this.series[i].v = b;
+                });
+            }
+            if (this.tableNum > 0) {
+                row._td()._button("Slet", () => {
+                    this.series.splice(i, 1);
+                    if (this.tableNum == 1)
+                        this.manu.feedTable.redraw();
+                    else
+                        this.manu.sleepTable.redraw();
+                });
+            }
+        }
+    }
 });
