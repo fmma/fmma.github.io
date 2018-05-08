@@ -76,8 +76,8 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                 const rightBorder = 0;
                 const topBorder = 0;
                 const botBorder = 50;
-                const width = window.innerWidth - leftBorder - rightBorder;
-                const height = Math.min(width / 3, 400) + topBorder + botBorder;
+                const width = window.innerWidth;
+                const height = Math.min(width / 2.5, 400) + topBorder + botBorder;
                 const today = new Date().getTime();
                 const minT = offset + today - reso.getTime(); // Math.min(Math.min(... model.sleep.map(p => p.t0)), Math.min(... model.feed.map(p => p.t0))) - 10000;
                 const maxT = offset + today;
@@ -247,13 +247,18 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             return timeContainer;
         }
         function makeControl(key) {
-            const width4 = "25%";
+            const width4 = "50%";
             const displayName = key === "sleep" ? "Søvn" : "Amning";
             const nextTime = key === "sleep" ? nextTimeSleep : nextTimeFeed;
             const series = model[key];
             const open = series.length > 0 && series[series.length - 1].t1 == null;
             const div = parent._div();
-            timeContainer(div, false, width4)._text(displayName + ": ");
+            const div2 = parent._div();
+            const tc = timeContainer(div, false, width4);
+            tc.style.textAlign = "left";
+            tc.style.verticalAlign = "top";
+            tc.style.fontVariant = "small-caps";
+            tc._text(displayName);
             if (open) {
                 const button = div._button("Slut", () => __awaiter(this, void 0, void 0, function* () {
                     series[series.length - 1].t1 = new Date().getTime();
@@ -263,7 +268,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                     drawSite(parent, model, reso, avgMode);
                 }));
                 button.style.width = width4;
-                const time = timeContainer(div, true, width4)._text(dom_1.formatTime(new Date(new Date().getTime() - series[series.length - 1].t0), true));
+                const time = timeContainer(div2, true, width4)._text(dom_1.formatTime(new Date(new Date().getTime() - series[series.length - 1].t0), true));
                 tickFuns[key] = () => {
                     time.textContent = dom_1.formatTime(new Date(new Date().getTime() - series[series.length - 1].t0), true);
                     // drawSite(parent, model, reso);
@@ -282,17 +287,17 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                     const t = series[series.length - 1].t1;
                     if (t == null)
                         throw "";
-                    const time = timeContainer(div, false, width4)._text(dom_1.formatTime(new Date(new Date().getTime() - t), true));
+                    const time = timeContainer(div2, false, width4)._text(dom_1.formatTime(new Date(new Date().getTime() - t), true));
                     tickFuns[key] = () => {
                         time.textContent = dom_1.formatTime(new Date(new Date().getTime() - t), true);
                     };
                 }
                 else {
-                    const time = timeContainer(div, false, width4)._text("");
+                    const time = timeContainer(div2, false, width4)._text("");
                     tickFuns[key] = () => { };
                 }
             }
-            const regret = div._button("Fortryd", () => __awaiter(this, void 0, void 0, function* () {
+            const regret = div2._button("Fortryd", () => __awaiter(this, void 0, void 0, function* () {
                 series.pop();
                 regret.disabled = true;
                 yield model_1.saveModel(model);
@@ -304,7 +309,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             if (series.length > 0 && !open) {
                 const t = series[series.length - 1].t1;
                 if (t) {
-                    const cont = timeContainer(div, false, width4);
+                    const cont = timeContainer(div2, false, width4);
                     const d = new Date(t + nextTime * 3600 * 1000);
                     const ttt = cont._text(dom_1.formatTime(d, false));
                     cont.style.background = (key === "sleep") === (new Date().getTime() > d.getTime()) ? "pink" : "lightgreen";
@@ -326,8 +331,8 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                 tickFuns[key + "Next"] = () => { };
             }
             if (key == "feed") {
-                timeContainer(parent, true, "25%");
-                const hv = timeContainer(parent, false, "25%");
+                timeContainer(parent, true, width4);
+                const hv = timeContainer(parent, false, width4);
                 const disabled = !(model.feed.length > 0 && model.feed[model.feed.length - 1].t1 == null);
                 hv._text("V");
                 hv._checkbox(series[series.length - 1] && series[series.length - 1].v || false, b => {
@@ -361,11 +366,14 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             };
         }
         parent._draw(() => {
-            parent._link("Manu ret", "#pages/manu").onclick = () => clearInterval(iv);
             makeControl("sleep");
+            parent._hr();
             makeControl("feed");
             makeGantt();
+            parent._h1("Statitstk");
             makeStatistics();
+            parent._h1("Menu");
+            parent._link("Manu ret", "#pages/manu").onclick = () => clearInterval(iv);
         });
     }
     let twerp = 0.0;
