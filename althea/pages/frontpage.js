@@ -9,6 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 define(["require", "exports", "../model", "../dom", "d3"], function (require, exports, model_1, dom_1, d3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    const nextTimeSleep = 1.5;
+    const nextTimeFeed = 2.75;
     let iv;
     function makeSite(parent) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -21,7 +23,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                     mayorTick++;
                     if (mayorTick === 10) {
                         mayorTick = 0;
-                        tickFuns.reloadModel();
+                        // tickFuns.reloadModel();
                     }
                     tickFuns.sleepTotal();
                     tickFuns.sleep();
@@ -247,7 +249,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
         function makeControl(key) {
             const width4 = "25%";
             const displayName = key === "sleep" ? "Søvn" : "Amning";
-            const nextTime = key === "sleep" ? 1.5 : 2.5;
+            const nextTime = key === "sleep" ? nextTimeSleep : nextTimeFeed;
             const series = model[key];
             const open = series.length > 0 && series[series.length - 1].t1 == null;
             const div = parent._div();
