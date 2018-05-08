@@ -370,7 +370,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             parent._hr();
             makeControl("feed");
             makeGantt();
-            parent._h1("Statitstk");
+            parent._h1("Statistik");
             makeStatistics();
             parent._h1("Menu");
             parent._link("Manu ret", "#pages/manu").onclick = () => clearInterval(iv);
