@@ -318,14 +318,14 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                     };
                 }
                 else {
-                    const cont = timeContainer(div, false, width4);
+                    const cont = timeContainer(div2, false, width4);
                     cont.hidden = true;
                     cont._text("");
                     tickFuns[key + "Next"] = () => { };
                 }
             }
             else {
-                const cont = timeContainer(div, false, width4);
+                const cont = timeContainer(div2, false, width4);
                 cont.hidden = true;
                 cont._text("");
                 tickFuns[key + "Next"] = () => { };
