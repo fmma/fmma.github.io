@@ -9,9 +9,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 define(["require", "exports", "../model"], function (require, exports, model_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    let manu = null;
+    function takeDown() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (manu) {
+                manu.takeDown();
+                manu = null;
+            }
+        });
+    }
+    exports.takeDown = takeDown;
     function makeSite(parent) {
         return __awaiter(this, void 0, void 0, function* () {
-            new Manu(parent._div(), yield model_1.loadModel(false));
+            manu = new Manu(parent._div(), yield model_1.loadModel(false));
         });
     }
     exports.makeSite = makeSite;
@@ -24,6 +34,11 @@ define(["require", "exports", "../model"], function (require, exports, model_1) 
             this.div = div;
             this.model = model;
             this.makeSite();
+        }
+        takeDown() {
+            if (this.div.parentElement) {
+                this.div.parentElement.removeChild(this.div);
+            }
         }
         makeSite() {
             this.makeMenu();

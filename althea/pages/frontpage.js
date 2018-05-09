@@ -12,9 +12,18 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
     const nextTimeSleep = 1.5;
     const nextTimeFeed = 2.75;
     let iv;
+    let div;
+    function takeDown() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (div.parentElement)
+                div.parentElement.removeChild(div);
+            clearInterval(iv);
+        });
+    }
+    exports.takeDown = takeDown;
     function makeSite(parent) {
         return __awaiter(this, void 0, void 0, function* () {
-            const div = parent._div();
+            div = parent._div();
             const model = yield model_1.loadModel(false);
             drawSite(div, model, new Date(12 * 3600 * 1000) /*12 hours*/, 0);
             let mayorTick = 0;
@@ -344,21 +353,7 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
                 }).disabled = disabled;
             }
         }
-        function makeStatistics() {
-            const sel = parent._select(["24 timer", "en uge", "for altid"], avgMode, i => {
-                drawSite(parent, model, reso, i);
-            });
-            const today = new Date().getTime();
-            const w = { t0: avgMode == 0 ? today - 24 * 3600 * 1000 : avgMode == 1 ? today - 7 * 24 * 3600 * 1000 : 0, t1: today };
-            parent._paragraph("Gennemsnit amning: " + dom_1.formatTime(new Date(model_1.average(model_1.sliceWindow(model.feed, w, false))), true));
-            parent._paragraph("Gennemsnit søvn: " + dom_1.formatTime(new Date(model_1.average(model_1.sliceWindow(model.sleep, w, false))), true));
-            const sleepTotal = parent._paragraph("Total søvn: " + dom_1.formatTime(new Date(model_1.total(model_1.sliceWindow(model.sleep, w, true))), true));
-            tickFuns.sleepTotal = () => {
-                const today = new Date().getTime();
-                const w = { t0: avgMode == 0 ? today - 24 * 3600 * 1000 : avgMode == 1 ? today - 7 * 24 * 3600 * 1000 : 0, t1: today };
-                sleepTotal.textContent = "Total søvn: " + dom_1.formatTime(new Date(model_1.total(model_1.sliceWindow(model.sleep, w, true))), true);
-            };
-            parent._paragraph("Gennemsnit vågen: " + dom_1.formatTime(new Date(model_1.average(model_1.sliceWindow(model_1.invert(model.sleep), w, false))), true));
+        function makeAltheaAnim() {
             const img = parent._div()._img("resources/apple-icon-180x180.png");
             tickFuns.anim = () => {
                 twerp += 0.01;
@@ -370,10 +365,10 @@ define(["require", "exports", "../model", "../dom", "d3"], function (require, ex
             parent._hr();
             makeControl("feed");
             makeGantt();
-            parent._h1("Statistik");
-            makeStatistics();
-            parent._h1("Menu");
-            parent._link("Manu ret", "#pages/manu").onclick = () => clearInterval(iv);
+            parent._link("Statistik", "#pages/stats");
+            parent._text(" - ");
+            parent._link("Manu ret", "#pages/manu");
+            makeAltheaAnim();
         });
     }
     let twerp = 0.0;
