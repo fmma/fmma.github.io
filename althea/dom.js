@@ -330,41 +330,4 @@ define(["require", "exports"], function (require, exports) {
                 document.body.innerHTML = msg + err;
             };
     }
-    let lastDom = null;
-    window.onhashchange = () => {
-        const x = window.location.hash.substr(1);
-        new Promise((resolve_1, reject_1) => { require(["./" + x], resolve_1, reject_1); }).then(m => {
-            makeSite(m);
-        });
-    };
-    function makeSite(r) {
-        if (lastDom) {
-            lastDom.takeDown();
-        }
-        lastDom = r;
-        if (r) {
-            if (document.body) {
-                try {
-                    const frag = document.createDocumentFragment();
-                    r.makeSite(frag).then(() => document.body.appendChild(frag));
-                }
-                catch (err) {
-                    error(err.toString());
-                }
-            }
-            else
-                window.onload = () => {
-                    try {
-                        r.makeSite(document.body);
-                    }
-                    catch (err) {
-                        error(err.toString());
-                    }
-                };
-        }
-        else {
-            error("Bad URL");
-        }
-    }
-    exports.makeSite = makeSite;
 });

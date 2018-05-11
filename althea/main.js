@@ -12,22 +12,6 @@ requirejs.config({
    }
 });
 
-function error(err) {
-    const msg = "Øv der er sket en fejl: ";
-    if(document.body)
-        document.body.innerHTML = msg + err;
-    else
-        window.onload = () => {
-            document.body.innerHTML = msg + err;
-        }
-}
-
-if(!window.location.hash)
-{
-    window.location.hash = "pages/frontpage";
-}
-
-require([window.location.hash.substr(1), "dom"], function (r, d) {
-    console.log(r, d);
-    d.makeSite(r);
-}, error);
+require(["site", "dom"], function (siteModule) {
+    new siteModule.Site();
+});

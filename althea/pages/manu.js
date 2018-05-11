@@ -6,45 +6,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-define(["require", "exports", "../model"], function (require, exports, model_1) {
+define(["require", "exports", "../model", "../page"], function (require, exports, model_1, page_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    let manu = null;
-    function takeDown() {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (manu) {
-                manu.takeDown();
-                manu = null;
-            }
-        });
-    }
-    exports.takeDown = takeDown;
-    function makeSite(parent) {
-        return __awaiter(this, void 0, void 0, function* () {
-            manu = new Manu(parent._div(), yield model_1.loadModel(false));
-        });
-    }
-    exports.makeSite = makeSite;
-    class Manu {
-        constructor(div, model) {
-            if (div == null)
-                throw new Error("Null div");
-            if (model == null)
-                throw new Error("Null model");
-            this.div = div;
-            this.model = model;
-            this.makeSite();
-        }
-        takeDown() {
-            if (this.div.parentElement) {
-                this.div.parentElement.removeChild(this.div);
-            }
-        }
+    class Manu extends page_1.Page {
         makeSite() {
-            this.makeMenu();
-            this.makeControlButtons();
-            this.makeFeedTable();
-            this.makeSleepTable();
+            return __awaiter(this, void 0, void 0, function* () {
+                this.makeMenu();
+                this.makeControlButtons();
+                this.makeFeedTable();
+                this.makeSleepTable();
+            });
         }
         makeMenu() {
             this.div._div()._link("Forside", "#pages/frontpage");
@@ -103,7 +75,8 @@ define(["require", "exports", "../model"], function (require, exports, model_1) 
         get n() {
             return this.series.length;
         }
-        ith(i, row) {
+        ith(j, row) {
+            const i = this.series.length - j - 1;
             this.date.setTime(this.series[i].t0);
             row._td()._inputDateTime(this.date, () => {
                 this.series[i].t0 = this.date.getTime();
@@ -131,4 +104,5 @@ define(["require", "exports", "../model"], function (require, exports, model_1) 
             }
         }
     }
+    exports.default = Manu;
 });

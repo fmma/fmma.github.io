@@ -123,7 +123,6 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
                             p.h = Boolean(Math.round(Math.random()));
                             p.v = Boolean(Math.round(Math.random()));
                         })*/
-                        model.dirty = false;
                         seriesCache[userID] = model;
                         resolve(model);
                     }
