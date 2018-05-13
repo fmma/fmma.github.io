@@ -12,6 +12,7 @@ define(["require", "exports"], function (require, exports) {
             if (model == null)
                 throw new Error("Null model");
             this.div = document.createElement("div");
+            this.startTicking();
         }
         startTicking() {
             this.interval = setInterval(() => {
