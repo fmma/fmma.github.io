@@ -20,6 +20,7 @@ define(["require", "exports", "./model", "./page"], function (require, exports, 
                     new page_1.Page(model, "#pages/frontpage", () => [new Promise((resolve_1, reject_1) => { require(["./webparts/menu"], resolve_1, reject_1); }), new Promise((resolve_2, reject_2) => { require(["./webparts/sleepAndFeed"], resolve_2, reject_2); }), new Promise((resolve_3, reject_3) => { require(["./webparts/gantt"], resolve_3, reject_3); }), new Promise((resolve_4, reject_4) => { require(["./webparts/althea"], resolve_4, reject_4); })]),
                     new page_1.Page(model, "#pages/stats", () => [new Promise((resolve_5, reject_5) => { require(["./webparts/menu"], resolve_5, reject_5); }), new Promise((resolve_6, reject_6) => { require(["./webparts/stats"], resolve_6, reject_6); })]),
                     new page_1.Page(model, "#pages/manu", () => [new Promise((resolve_7, reject_7) => { require(["./webparts/menu"], resolve_7, reject_7); }), new Promise((resolve_8, reject_8) => { require(["./webparts/manu"], resolve_8, reject_8); })]),
+                    new page_1.Page(model, "#pages/backup", () => [new Promise((resolve_9, reject_9) => { require(["./webparts/backup"], resolve_9, reject_9); })]),
                 ]);
             window.onhashchange = () => this.hashChanged();
             // this.swipeMenu();

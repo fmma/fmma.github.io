@@ -37,6 +37,11 @@ define(["require", "exports"], function (require, exports) {
         falseDiv.hidden = cond;
         return cond ? trueDiv : falseDiv;
     };
+    Node.prototype._pre = function (text) {
+        const pre = this.provideNode(() => document.createElement("pre"));
+        pre.textContent = text;
+        return pre;
+    };
     Node.prototype._link = function (name, href) {
         const result = this.provideNode(() => document.createElement("a"));
         result.innerHTML = name;
@@ -189,6 +194,7 @@ define(["require", "exports"], function (require, exports) {
         const month = ("0" + (date.getMonth() + 1)).slice(-2);
         return date.getFullYear() + "-" + month + "-" + day;
     }
+    exports.formatDate = formatDate;
     function formatTime(date, utc, seconds = true) {
         if (utc) {
             let secs = Math.floor(date.getTime() / 1000);
