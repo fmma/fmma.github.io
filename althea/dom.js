@@ -30,6 +30,13 @@ define(["require", "exports"], function (require, exports) {
         this.className = className;
         return this;
     };
+    Node.prototype._if = function (cond) {
+        const trueDiv = this.provideNode(() => document.createElement("div"));
+        const falseDiv = this.provideNode(() => document.createElement("div"));
+        trueDiv.hidden = !cond;
+        falseDiv.hidden = cond;
+        return cond ? trueDiv : falseDiv;
+    };
     Node.prototype._link = function (name, href) {
         const result = this.provideNode(() => document.createElement("a"));
         result.innerHTML = name;
@@ -197,7 +204,6 @@ define(["require", "exports"], function (require, exports) {
             res += seconds && (res || secs > 0) ? secs + "s" : "";
             return res;
         }
-        const days = Math.floor(date.getTime() / (24 * 60 * 60 * 1000));
         const hour = ("0" + date.getHours()).slice(-2);
         const minute = ("0" + date.getMinutes()).slice(-2);
         const sec = ("0" + date.getSeconds()).slice(-2);

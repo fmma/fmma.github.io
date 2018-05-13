@@ -9,17 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 define(["require", "exports", "../model", "../webpart"], function (require, exports, model_1, webpart_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class Manu extends webpart_1.Page {
-        makeSite() {
+    class Manu extends webpart_1.Webpart {
+        make() {
             return __awaiter(this, void 0, void 0, function* () {
-                this.makeMenu();
                 this.makeControlButtons();
                 this.makeFeedTable();
                 this.makeSleepTable();
             });
-        }
-        makeMenu() {
-            this.div._div()._link("Forside", "#pages/frontpage");
         }
         makeControlButtons() {
             const buttonsDiv = this.div._div();

@@ -14,19 +14,18 @@ define(["require", "exports", "../model", "../dom", "../webpart"], function (req
             super(...arguments);
             this.avgMode = 0;
         }
-        makeSite() {
+        make() {
             return __awaiter(this, void 0, void 0, function* () {
-                this.div._div()._link("Forside", "#pages/frontpage");
                 const sel = this.div._select(["24 timer", "en uge", "for altid"], this.avgMode, i => {
                     this.avgMode = i;
-                    this.drawSite();
+                    this.draw();
                 });
                 const gnmAmn = this.div._paragraph("");
                 const gnmMlAmn = this.div._paragraph("");
                 const gnmSovn = this.div._paragraph("");
                 const sleepPerDay = this.div._paragraph("");
                 const gnmVaag = this.div._paragraph("");
-                this.tick.updateStats = () => {
+                this.ticks.updateStats = () => {
                     const today = new Date().getTime();
                     const timeFrame = this.avgMode == 0 ? 1 : this.avgMode == 1 ? 7 : (today - this.model.sleep[0].t0) / (24 * 3600 * 1000);
                     const w = { t0: this.avgMode == 0 ? today - 24 * 3600 * 1000 : this.avgMode == 1 ? today - 7 * 24 * 3600 * 1000 : 0, t1: today };
@@ -36,7 +35,7 @@ define(["require", "exports", "../model", "../dom", "../webpart"], function (req
                     sleepPerDay.textContent = "Søvn / døgn: " + dom_1.formatTime(new Date(model_1.total(model_1.sliceWindow(this.model.sleep, w, true)) / timeFrame), true);
                     gnmVaag.textContent = "Gennemsnit vågen: " + dom_1.formatTime(new Date(model_1.average(model_1.sliceWindow(model_1.invert(this.model.sleep), w, false))), true);
                 };
-                this.tick.updateStats();
+                this.ticks.updateStats();
             });
         }
     }

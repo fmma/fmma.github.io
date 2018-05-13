@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 define(["require", "exports", "../model", "../dom", "../webpart", "./gantt"], function (require, exports, model_1, dom_1, webpart_1, gantt_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class FrontPage extends webpart_1.Page {
+    class FrontPage extends webpart_1.Webpart {
         constructor(model) {
             super(model);
             this.nextTimeSleep = 1.5;

@@ -1,3 +1,11 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -59,37 +67,47 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
     }
     exports.average = average;
     function saveModel(model) {
-        if (location.hostname == "localhost") {
-            console.warn("Hostname is localhost. Save will not persist.");
+        return __awaiter(this, void 0, void 0, function* () {
+            const currentModel = yield loadModel(true);
+            if (model.version !== currentModel.version) {
+                alert("Du kan ikke gemme da data er forældet. Genindlæs appen og prøv igen.");
+                return;
+            }
+            if (location.hostname == "localhost") {
+                console.warn("Hostname is localhost. Save will not persist.");
+                seriesCache[name] = model;
+                return;
+            }
+            if (model !== currentModel) {
+                model.version = 1 + (model.version || 0);
+            }
+            const docClient = new aws.DynamoDB.DocumentClient({
+                region: "eu-west-1",
+                endpoint: "https://dynamodb.eu-west-1.amazonaws.com",
+                convertEmptyValues: true,
+                accessKeyId: "AKIAIWAB4KO6GED7WCIQ",
+                // secretAccessKey default can be used while using the downloadable version of DynamoDB. 
+                // For security reasons, do not store aws Credentials in your files. Use Amazon Cognito instead.
+                secretAccessKey: "apevBQ09w3Z3FjuOPjFLUPlO92KB6+PhKmlCkfWB"
+            });
+            const updateParams = {
+                TableName: "vaegt-api",
+                Key: { "userID": userID },
+                UpdateExpression: "set m = :m",
+                ExpressionAttributeValues: {
+                    ":m": model
+                },
+                ReturnValues: "UPDATED_NEW"
+            };
             seriesCache[name] = model;
-            return;
-        }
-        const docClient = new aws.DynamoDB.DocumentClient({
-            region: "eu-west-1",
-            endpoint: "https://dynamodb.eu-west-1.amazonaws.com",
-            convertEmptyValues: true,
-            accessKeyId: "AKIAIWAB4KO6GED7WCIQ",
-            // secretAccessKey default can be used while using the downloadable version of DynamoDB. 
-            // For security reasons, do not store aws Credentials in your files. Use Amazon Cognito instead.
-            secretAccessKey: "apevBQ09w3Z3FjuOPjFLUPlO92KB6+PhKmlCkfWB"
-        });
-        const updateParams = {
-            TableName: "vaegt-api",
-            Key: { "userID": userID },
-            UpdateExpression: "set m = :m",
-            ExpressionAttributeValues: {
-                ":m": model
-            },
-            ReturnValues: "UPDATED_NEW"
-        };
-        seriesCache[name] = model;
-        docClient.update(updateParams, (err, data) => {
-            if (err) {
-                console.log("Error JSON: " + JSON.stringify(err) + "\n");
-            }
-            else {
-                console.log("PutItem succeeded: " + data + "\n");
-            }
+            docClient.update(updateParams, (err, data) => {
+                if (err) {
+                    console.log("Error JSON: " + JSON.stringify(err) + "\n");
+                }
+                else {
+                    console.log("PutItem succeeded: " + data + "\n");
+                }
+            });
         });
     }
     exports.saveModel = saveModel;

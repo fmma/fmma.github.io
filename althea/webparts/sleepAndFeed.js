@@ -6,48 +6,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-define(["require", "exports", "../model", "../dom", "../webpart", "./gantt"], function (require, exports, model_1, dom_1, webpart_1, gantt_1) {
+define(["require", "exports", "../model", "../dom", "../webpart"], function (require, exports, model_1, dom_1, webpart_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class FrontPage extends webpart_1.Page {
-        constructor(model) {
-            super(model);
+    class FrontPage extends webpart_1.Webpart {
+        constructor() {
+            super(...arguments);
             this.nextTimeSleep = 1.5;
             this.nextTimeFeed = 2.75;
-            this.anim = () => { };
-            this.twerp = 0.0;
-            const f = () => {
-                this.anim();
-                animFix();
-            };
-            const animFix = () => {
-                window.requestAnimationFrame(f);
-            };
-            animFix();
-            this.ganttPlot = new gantt_1.GanttPlot(model);
-            this.ganttPlot.div = this.div;
         }
-        takeDown() {
-            const _super = name => super[name];
-            return __awaiter(this, void 0, void 0, function* () {
-                this.ganttPlot.takeDown();
-                _super("takeDown").call(this);
-            });
-        }
-        makeSite() {
+        make() {
             return __awaiter(this, void 0, void 0, function* () {
                 this.makeControl("sleep");
                 this.div._hr();
                 this.makeControl("feed");
-                this.makeGantt();
-                this.div._link("Statistik", "#pages/stats");
-                this.div._text(" - ");
-                this.div._link("Manu ret", "#pages/manu");
-                this.makeAltheaAnim();
             });
-        }
-        makeGantt() {
-            this.ganttPlot.makeSite();
         }
         timeContainer(div, open, width4) {
             const timeContainer = div._span();
@@ -76,11 +49,11 @@ define(["require", "exports", "../model", "../dom", "../webpart", "./gantt"], fu
                     button.disabled = true;
                     yield model_1.saveModel(this.model);
                     button.disabled = false;
-                    yield this.drawSite();
+                    yield this.drawPage();
                 }));
                 button.style.width = width4;
                 const time = this.timeContainer(div2, true, width4)._text(dom_1.formatTime(new Date(new Date().getTime() - series[series.length - 1].t0), true));
-                this.tick[key] = () => {
+                this.ticks[key] = () => {
                     time.textContent = dom_1.formatTime(new Date(new Date().getTime() - series[series.length - 1].t0), true);
                     // drawSite(parent, model, reso);
                 };
@@ -91,7 +64,7 @@ define(["require", "exports", "../model", "../dom", "../webpart", "./gantt"], fu
                     button.disabled = true;
                     yield model_1.saveModel(this.model);
                     button.disabled = false;
-                    this.drawSite();
+                    this.drawPage();
                 }));
                 button.style.width = width4;
                 if (series.length > 0) {
@@ -99,13 +72,13 @@ define(["require", "exports", "../model", "../dom", "../webpart", "./gantt"], fu
                     if (t == null)
                         throw "";
                     const time = this.timeContainer(div2, false, width4)._text(dom_1.formatTime(new Date(new Date().getTime() - t), true));
-                    this.tick[key] = () => {
+                    this.ticks[key] = () => {
                         time.textContent = dom_1.formatTime(new Date(new Date().getTime() - t), true);
                     };
                 }
                 else {
                     const time = this.timeContainer(div2, false, width4)._text("");
-                    this.tick[key] = () => { };
+                    this.ticks[key] = () => { };
                 }
             }
             const regret = div2._button("Fortryd", () => __awaiter(this, void 0, void 0, function* () {
@@ -113,7 +86,7 @@ define(["require", "exports", "../model", "../dom", "../webpart", "./gantt"], fu
                 regret.disabled = true;
                 yield model_1.saveModel(this.model);
                 regret.disabled = false;
-                this.drawSite();
+                this.drawPage();
             }));
             regret.hidden = !open;
             regret.style.width = width4;
@@ -124,7 +97,7 @@ define(["require", "exports", "../model", "../dom", "../webpart", "./gantt"], fu
                     const d = new Date(t + nextTime * 3600 * 1000);
                     const ttt = cont._text(dom_1.formatTime(d, false));
                     cont.style.background = (key === "sleep") === (new Date().getTime() > d.getTime()) ? "pink" : "lightgreen";
-                    this.tick[key + "Next"] = () => {
+                    this.ticks[key + "Next"] = () => {
                         cont.style.background = (key === "sleep") === (new Date().getTime() > d.getTime()) ? "pink" : "lightgreen";
                     };
                 }
@@ -132,14 +105,14 @@ define(["require", "exports", "../model", "../dom", "../webpart", "./gantt"], fu
                     const cont = this.timeContainer(div2, false, width4);
                     cont.hidden = true;
                     cont._text("");
-                    this.tick[key + "Next"] = () => { };
+                    this.ticks[key + "Next"] = () => { };
                 }
             }
             else {
                 const cont = this.timeContainer(div2, false, width4);
                 cont.hidden = true;
                 cont._text("");
-                this.tick[key + "Next"] = () => { };
+                this.ticks[key + "Next"] = () => { };
             }
             if (key == "feed") {
                 this.timeContainer(this.div, true, width4);
@@ -154,13 +127,6 @@ define(["require", "exports", "../model", "../dom", "../webpart", "./gantt"], fu
                     series[series.length - 1].h = b;
                 }).disabled = disabled;
             }
-        }
-        makeAltheaAnim() {
-            const img = this.div._div()._img("resources/apple-icon-180x180.png");
-            this.anim = () => {
-                this.twerp += 0.01;
-                img.style.marginLeft = ((window.innerWidth - 200) * (0.5 + Math.cos(this.twerp) / 2)) + "px";
-            };
         }
     }
     exports.default = FrontPage;
