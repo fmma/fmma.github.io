@@ -10,7 +10,7 @@ define(["require", "exports", "../model", "../webpart"], function (require, expo
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Manu extends webpart_1.Webpart {
-        make() {
+        dom() {
             return __awaiter(this, void 0, void 0, function* () {
                 this.makeControlButtons();
                 this.makeFeedTable();

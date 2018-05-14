@@ -10,7 +10,7 @@ define(["require", "exports", "../webpart"], function (require, exports, webpart
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Menu extends webpart_1.Webpart {
-        make() {
+        dom() {
             return __awaiter(this, void 0, void 0, function* () {
                 this.link("Forside", "#pages/frontpage");
                 this.div._text("--");

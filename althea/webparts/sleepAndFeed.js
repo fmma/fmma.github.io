@@ -15,7 +15,7 @@ define(["require", "exports", "../model", "../dom", "../webpart"], function (req
             this.nextTimeSleep = 1.5;
             this.nextTimeFeed = 2.75;
         }
-        make() {
+        dom() {
             return __awaiter(this, void 0, void 0, function* () {
                 this.makeControl("sleep");
                 this.div._hr();

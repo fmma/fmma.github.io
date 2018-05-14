@@ -2,7 +2,7 @@ define(["require", "exports", "../webpart"], function (require, exports, webpart
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class EmptyPage extends webpart_1.Webpart {
-        make() {
+        dom() {
             throw new Error("Method not implemented.");
         }
     }

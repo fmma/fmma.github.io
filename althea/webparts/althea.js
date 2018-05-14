@@ -23,12 +23,12 @@ define(["require", "exports", "../webpart"], function (require, exports, webpart
             };
             animFix();
         }
-        make() {
+        dom() {
             return __awaiter(this, void 0, void 0, function* () {
                 const img = this.div._div()._img("resources/apple-icon-180x180.png");
                 this.anim = () => {
                     this.twerp += 0.01;
-                    img.style.marginLeft = ((window.innerWidth - 200) * (0.5 + Math.cos(this.twerp) / 2)) + "px";
+                    img.style.marginLeft = ((window.innerWidth - 220) * (0.5 + Math.cos(this.twerp) / 2)) + "px";
                 };
             });
         }

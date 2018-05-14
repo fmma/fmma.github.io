@@ -32,7 +32,7 @@ define(["require", "exports"], function (require, exports) {
                 this.div.parentElement.removeChild(this.div);
         }
         draw() {
-            this.div._draw(() => this.make());
+            this.div._draw(() => this.dom());
         }
         drawPage() {
             if (this.page) {
