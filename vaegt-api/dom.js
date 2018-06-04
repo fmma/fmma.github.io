@@ -150,6 +150,20 @@ define(["require", "exports"], function (require, exports) {
         button.onclick = action;
         return button;
     };
+    Node.prototype._select = function (options, j, onchange = () => { }) {
+        const sel = this.provideNode(() => document.createElement("select"));
+        sel.selectedIndex = j;
+        sel.onchange = (x) => {
+            if (sel.selectedIndex >= 0 && sel.selectedIndex < options.length)
+                onchange(sel.selectedIndex);
+        };
+        for (let i = 0; i < options.length; ++i) {
+            const opt = sel.provideNode(() => document.createElement("option"));
+            opt.textContent = options[i];
+            opt.value = options[i];
+        }
+        return sel;
+    };
     Node.prototype._input = function (placeholder, type, value, onchange = () => { }) {
         const input = this.provideNode(() => document.createElement("input"));
         input.placeholder = placeholder;

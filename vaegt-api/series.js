@@ -193,7 +193,7 @@ define(["require", "exports", "aws-sdk"], function (require, exports, aws) {
         const t0 = p0.t.getTime();
         const t1 = p1.t.getTime();
         const w = (t1 - t) * p0.w / (t1 - t0) + (t - t0) * p1.w / (t1 - t0);
-        return { t: date, w: w };
+        return t >= t0 && t <= t1 ? { t: date, w: w } : null;
     }
     exports.interpolate = interpolate;
 });

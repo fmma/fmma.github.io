@@ -13,8 +13,12 @@ define(["require", "exports", "./series", "./menu"], function (require, exports,
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield series_1.loadSeriesWithTarget(series_1.sessionSeriesName());
             const target = data.target;
-            const targetInput = parent._inputWeight("Target", NaN)._class("big");
+            const targetInput = parent._input("Diff", "text", "")._class("big");
             targetInput.readOnly = true;
+            targetInput.style.width = "40%";
+            const targetInput2 = parent._input("Target", "text", "")._class("big");
+            targetInput2.readOnly = true;
+            targetInput2.style.width = "40%";
             const weightInput = parent._inputWeight("Vægt", data.series.length > 0 ? data.series[data.series.length - 1].w : NaN, () => { }, () => targetTick(targetState))._class("big");
             const okButton = parent._button("Ok", () => {
                 okButton.disabled = true;
@@ -30,6 +34,7 @@ define(["require", "exports", "./series", "./menu"], function (require, exports,
             const targetState = {
                 weightInput: weightInput,
                 targetInput: targetInput,
+                targetInput2: targetInput2,
                 series: target,
                 p0: target[0],
                 p1: target[1],
@@ -66,10 +71,17 @@ define(["require", "exports", "./series", "./menu"], function (require, exports,
         const w = (t1 - t) * p0.w / (t1 - t0) + (t - t0) * p1.w / (t1 - t0);
         const input = st.targetInput;
         const winput = st.weightInput;
-        const diff = w - (+winput.value);
-        input.value = diff.toFixed(7);
+        let diff = w - (+winput.value);
+        const neg = diff <= 0;
+        diff = Math.abs(diff);
+        let kg = Math.floor(diff);
+        let grams = Math.round(1000 * (diff - kg));
+        input.value = (!neg ? "Over: " : "Under: ") + (kg === 0 ? "" : (kg + "kg ")) + (grams === 0 ? "" : (grams + "g"));
         input.style.color = "white";
-        input.style.backgroundColor = diff < 0 ? "red" : "green";
+        input.style.backgroundColor = neg ? "red" : "green";
+        kg = Math.floor(w);
+        grams = Math.round(1000 * (w - kg));
+        st.targetInput2.value = "Target: " + w.toFixed(1);
     }
     function targetRepeat(targetState) {
         targetTick(targetState);
