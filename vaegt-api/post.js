@@ -76,12 +76,12 @@ define(["require", "exports", "./series", "./menu"], function (require, exports,
         diff = Math.abs(diff);
         let kg = Math.floor(diff);
         let grams = Math.round(1000 * (diff - kg));
-        input.value = (!neg ? "Over: " : "Under: ") + (kg === 0 ? "" : (kg + "kg ")) + (grams === 0 ? "" : (grams + "g"));
+        input.value = (kg === 0 ? "" : (kg + "kg ")) + (grams === 0 ? "" : (grams + "g"));
         input.style.color = "white";
         input.style.backgroundColor = neg ? "red" : "green";
         kg = Math.floor(w);
         grams = Math.round(1000 * (w - kg));
-        st.targetInput2.value = "Target: " + w.toFixed(1);
+        st.targetInput2.value = w.toFixed(1);
     }
     function targetRepeat(targetState) {
         targetTick(targetState);
